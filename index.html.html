@@ -1,0 +1,2544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComPDF | The Smarter iText Alternative for PDF Generation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-blue: #396FFA;
+            --brand-blue-deep: #244FF0;
+            --brand-ink: #232748;
+            --brand-cyan: #7AFBFF;
+            --surface: #F3F6FF;
+            --line: #CDDBFF;
+            --footer-bg: #191D45;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--brand-ink);
+            background: #ffffff;
+        }
+
+        .btn-primary {
+            background-color: var(--brand-blue);
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: var(--brand-blue-deep);
+        }
+
+        .metric-card, .feature-card {
+            border: 1px solid var(--line);
+            background: #ffffff;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border-bottom: 1px solid #E1E3E8;
+        }
+        /* Mobile: transform comparison table into stacked cards */
+        @media (max-width: 767px) {
+            .comparison-table thead { display: none; }
+            .comparison-table,
+            .comparison-table tbody,
+            .comparison-table tr,
+            .comparison-table td { display: block; width: 100%; }
+            .comparison-table tr {
+                margin-bottom: 16px;
+                border: 1px solid #E1E3E8;
+                border-radius: 12px;
+                overflow: hidden;
+                background: #fff;
+            }
+            .comparison-table td {
+                padding: 10px 16px;
+                border-bottom: 1px solid #f0f1f3;
+            }
+            .comparison-table td:last-child { border-bottom: none; }
+            /* Criteria row becomes card header */
+            .comparison-table td[data-label="Criteria"] {
+                background: var(--surface);
+                font-size: 14px;
+                font-weight: 700;
+                color: var(--brand-ink);
+            }
+            /* Show data-label as prefix */
+            .comparison-table td[data-label="ComPDF"]::before,
+            .comparison-table td[data-label="iText"]::before {
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                margin-bottom: 4px;
+                content: attr(data-label);
+            }
+            .comparison-table td[data-label="ComPDF"]::before {
+                color: var(--brand-blue);
+            }
+            .comparison-table td[data-label="iText"]::before {
+                color: #94969D;
+            }
+        }
+
+        /* ── Hero full-bleed banner ── */
+        .hero-banner {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(155deg, #060B18 0%, #0C1630 25%, #131D45 50%, #1A2B5E 75%, #1E3575 100%);
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(800px 500px at 75% 25%, rgba(57,111,250,0.28), transparent 65%),
+                radial-gradient(500px 400px at 85% 60%, rgba(30,53,117,0.5), transparent 60%),
+                radial-gradient(300px 300px at 15% 80%, rgba(57,111,250,0.08), transparent 50%);
+            pointer-events: none;
+        }
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.04;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 48px 48px;
+            pointer-events: none;
+        }
+
+        /* Hero two-column layout */
+        .hero-inner {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 140px 0 80px;
+            gap: 48px;
+        }
+        .hero-left {
+            flex: 1;
+            max-width: 560px;
+        }
+        .hero-right {
+            flex: 1;
+            max-width: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 1023px) {
+            .hero-inner { flex-direction: column; text-align: center; padding: 120px 0 60px; }
+            .hero-left { max-width: 100%; }
+            .hero-right { display: none; }
+        }
+        @media (min-width: 1024px) and (max-width: 1279px) {
+            .hero-right { max-width: 400px; }
+            .hero-inner { gap: 32px; }
+            .cap-float-card { right: -8px; bottom: 20px; }
+            .code-body { font-size: 11px; }
+        }
+        @media (min-width: 1536px) {
+            .hero-left { max-width: 640px; }
+            .hero-right { max-width: 560px; }
+            .hero-inner { gap: 64px; padding: 160px 0 100px; }
+        }
+
+        /* ── Hero: Code Editor Mockup ── */
+        .hero-mockup {
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            margin: 0 auto;
+        }
+        /* Glow behind the editor */
+        .hero-mockup::before {
+            content: '';
+            position: absolute;
+            width: 110%;
+            height: 110%;
+            top: -5%;
+            left: -5%;
+            border-radius: 24px;
+            background: radial-gradient(ellipse at 60% 40%, rgba(57,111,250,0.12) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .code-window {
+            position: relative;
+            z-index: 1;
+            border-radius: 12px;
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(57,111,250,0.08);
+            overflow: hidden;
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        /* Title bar */
+        .code-titlebar {
+            display: flex;
+            align-items: center;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            gap: 8px;
+        }
+        .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .code-dot-r { background: #ff5f57; }
+        .code-dot-y { background: #febc2e; }
+        .code-dot-g { background: #28c840; }
+        .code-titlebar-text {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 0.5px;
+        }
+        /* Language tabs */
+        .code-tabs {
+            display: flex;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            overflow-x: auto;
+        }
+        .code-tab {
+            padding: 7px 14px;
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.3);
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            cursor: default;
+            transition: color 0.2s;
+        }
+        .code-tab.active {
+            color: rgba(122,251,255,0.9);
+            border-bottom-color: rgba(122,251,255,0.6);
+            background: rgba(122,251,255,0.03);
+        }
+        /* Code body */
+        .code-body {
+            padding: 14px 0;
+            font-size: 12.5px;
+            line-height: 1.7;
+            overflow: hidden;
+        }
+        .code-line {
+            display: flex;
+            padding: 0 16px 0 0;
+        }
+        .code-line:hover { background: rgba(255,255,255,0.02); }
+        .line-num {
+            display: inline-block;
+            width: 36px;
+            text-align: right;
+            padding-right: 14px;
+            color: rgba(255,255,255,0.15);
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .line-content { flex: 1; white-space: pre; }
+        /* Syntax colors — GitHub-dark inspired */
+        .syn-kw { color: #ff7b72; }       /* keywords */
+        .syn-type { color: #79c0ff; }     /* types / classes */
+        .syn-str { color: #a5d6ff; }      /* strings */
+        .syn-fn { color: #d2a8ff; }       /* methods */
+        .syn-cmt { color: #484f58; font-style: italic; }  /* comments */
+        .syn-num { color: #79c0ff; }      /* numbers */
+        .syn-op { color: rgba(255,255,255,0.6); }  /* operators, punctuation */
+        .syn-plain { color: rgba(255,255,255,0.75); }
+        /* Output / console */
+        .code-output {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding: 10px 16px;
+            background: rgba(0,207,133,0.03);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .output-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #28c840;
+            box-shadow: 0 0 6px rgba(40,200,64,0.5);
+            animation: output-blink 2s ease-in-out infinite;
+        }
+        @keyframes output-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .output-text {
+            font-size: 11px;
+            color: rgba(0,207,133,0.8);
+            letter-spacing: 0.3px;
+        }
+        .output-time {
+            margin-left: auto;
+            font-size: 10px;
+            color: rgba(255,255,255,0.2);
+        }
+        /* Format badges row */
+        .code-formats {
+            padding: 8px 16px 10px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+        .fmt-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+        }
+        /* Floating capability card */
+        .cap-float-card {
+            position: absolute;
+            right: -16px;
+            bottom: 32px;
+            z-index: 5;
+            background: rgba(13,17,23,0.92);
+            border: 1px solid rgba(57,111,250,0.2);
+            border-radius: 10px;
+            padding: 10px 14px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            animation: cap-float-bob 4s ease-in-out infinite;
+        }
+        @keyframes cap-float-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .cap-float-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 0;
+            font-size: 10px;
+            color: rgba(255,255,255,0.55);
+        }
+        .cap-float-item svg { flex-shrink: 0; }
+
+        /* Bottom gradient fade for depth */
+        .hero-banner-depth {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 120px;
+            background: linear-gradient(to bottom, transparent, rgba(6,11,24,0.6));
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .benchmark-table th { background: var(--surface); }
+        .benchmark-win { color: #16a34a; font-weight: 700; }
+        .benchmark-lose { color: #94969D; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 60;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(8, 15, 33, 0.68);
+        }
+
+        .footer-link { color: #94969D; transition: color 0.15s; }
+        .footer-link:hover { color: #ffffff; }
+        .footer-title { color: #ffffff; font-weight: 600; font-size: 14px; margin-bottom: 16px; }
+
+        /* ── Language Switcher ── */
+        .lang-switcher {
+            position: relative;
+        }
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            transition: border-color 0.15s;
+            white-space: nowrap;
+        }
+        .lang-btn:hover { border-color: var(--brand-blue); }
+        .lang-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            z-index: 100;
+            min-width: 160px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        .lang-dropdown.open { display: block; }
+        .lang-option {
+            display: block;
+            width: 100%;
+            padding: 7px 12px;
+            border: none;
+            background: none;
+            text-align: left;
+            font-size: 13px;
+            color: #334155;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.1s;
+        }
+        .lang-option:hover { background: #f1f5f9; }
+        .lang-option.active { color: var(--brand-blue); font-weight: 600; background: rgba(57,111,250,0.06); }
+        [dir="rtl"] { direction: rtl; text-align: right; }
+        [dir="rtl"] .lang-dropdown { right: auto; left: 0; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- ═══════════ HEADER ═══════════ -->
+    <header class="bg-white/95 backdrop-blur border-b border-slate-200 fixed top-0 w-full z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+            <a href="https://www.compdf.com/" target="_blank" rel="noopener" class="flex items-center" aria-label="Go to ComPDF home">
+                <img src="https://www.compdf.com/download/images/compdfkit.png" alt="ComPDF logo" class="h-8 w-auto" loading="eager">
+            </a>
+            <div class="flex items-center gap-3">
+                <a href="https://www.compdf.com/pricing?tag=free-trial" target="_blank" class="hidden sm:inline-flex text-sm font-medium text-slate-600 hover:text-[var(--brand-blue)]" data-i18n="nav.trial">Free Trial</a>
+                <button type="button" class="cta-btn btn-primary text-white font-semibold px-5 py-2.5 rounded-lg text-sm" data-i18n="nav.contact">Contact Sales</button>
+                <!-- Language Switcher -->
+                <div class="lang-switcher">
+                    <button type="button" class="lang-btn" id="langBtn" onclick="document.getElementById('langDropdown').classList.toggle('open')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span id="langLabel">EN</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <button class="lang-option" data-lang="zh-CN">简体中文</button>
+                        <button class="lang-option" data-lang="ar">العربية</button>
+                        <button class="lang-option" data-lang="de">Deutsch</button>
+                        <button class="lang-option active" data-lang="en">English</button>
+                        <button class="lang-option" data-lang="es">Español</button>
+                        <button class="lang-option" data-lang="fr">Français</button>
+                        <button class="lang-option" data-lang="ja">日本語</button>
+                        <button class="lang-option" data-lang="ko">한국어</button>
+                        <button class="lang-option" data-lang="ru">Русский</button>
+                        <button class="lang-option" data-lang="th">ไทย</button>
+                        <button class="lang-option" data-lang="zh-TW">繁體中文</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- ═══════════ HERO BANNER (full-bleed) ═══════════ -->
+        <section class="hero-banner" id="heroSection">
+            <div class="hero-inner max-w-7xl mx-auto px-4 sm:px-6">
+                <!-- Left: Text content -->
+                <div class="hero-left text-white">
+                    <span class="inline-flex w-fit rounded-full bg-white/10 border border-white/20 text-xs font-semibold px-4 py-1.5 mb-6 tracking-wide" style="color: var(--brand-cyan);" data-i18n="hero.badge">ComPDF vs iText — A Smarter Choice</span>
+                    <h1 class="text-4xl sm:text-5xl lg:text-[54px] leading-[1.8] font-extrabold">
+                        <span data-i18n="hero.t1">Same Capabilities.</span><br>
+                        <span style="color: var(--brand-cyan);" data-i18n="hero.t2">Better Value.</span><br>
+                        <span data-i18n="hero.t3">Faster Integration.</span>
+                    </h1>
+                    <p class="mt-8 text-blue-100/80 text-lg sm:text-xl max-w-xl leading-relaxed" data-i18n="hero.desc">
+                        ComPDF delivers enterprise-grade PDF generation with the features you expect from iText — plus native API table creation, transparent pricing, and 24/5 dedicated support. Accelerate your document workflows without the overhead.
+                    </p>
+                    <div class="mt-12 flex flex-col sm:flex-row gap-4">
+                        <a href="https://www.compdf.com/pricing?tag=free-trial" target="_blank" class="btn-primary text-white font-semibold px-8 py-3.5 rounded-lg text-center" data-i18n="hero.cta1">Start Free Trial</a>
+                        <button type="button" class="cta-btn border border-white/40 text-white font-semibold px-8 py-3.5 rounded-lg hover:bg-white/10 text-center" data-i18n="hero.cta2">Request Technical Consultation</button>
+                    </div>
+                </div>
+                <!-- Right: Code editor mockup -->
+                <div class="hero-right">
+                    <div class="hero-mockup">
+                        <div class="code-window">
+                            <!-- Title bar -->
+                            <div class="code-titlebar">
+                                <div class="code-dot code-dot-r"></div>
+                                <div class="code-dot code-dot-y"></div>
+                                <div class="code-dot code-dot-g"></div>
+                                <span class="code-titlebar-text">ComPDF SDK — InvoiceGenerator.java</span>
+                            </div>
+                            <!-- Language tabs -->
+                            <div class="code-tabs">
+                                <div class="code-tab active">Java</div>
+                                <div class="code-tab">C#</div>
+                                <div class="code-tab">C++</div>
+                                <div class="code-tab">Python</div>
+                                <div class="code-tab">Web</div>
+                            </div>
+                            <!-- Code body -->
+                            <div class="code-body">
+                                <div class="code-line"><span class="line-num">1</span><span class="line-content"><span class="syn-kw">import</span> <span class="syn-type">com.compdf.sdk</span><span class="syn-op">.*;</span></span></div>
+                                <div class="code-line"><span class="line-num">2</span><span class="line-content"></span></div>
+                                <div class="code-line"><span class="line-num">3</span><span class="line-content"><span class="syn-type">CPDFDocument</span> <span class="syn-plain">doc</span> <span class="syn-op">=</span> <span class="syn-kw">new</span> <span class="syn-type">CPDFDocument</span><span class="syn-op">();</span></span></div>
+                                <div class="code-line"><span class="line-num">4</span><span class="line-content"><span class="syn-plain">doc</span><span class="syn-op">.</span><span class="syn-fn">addPage</span><span class="syn-op">(</span><span class="syn-type">PageSize</span><span class="syn-op">.</span><span class="syn-plain">A4</span><span class="syn-op">);</span></span></div>
+                                <div class="code-line"><span class="line-num">5</span><span class="line-content"><span class="syn-plain">doc</span><span class="syn-op">.</span><span class="syn-fn">addTable</span><span class="syn-op">(</span><span class="syn-plain">invoiceData</span><span class="syn-op">);</span></span></div>
+                                <div class="code-line"><span class="line-num">6</span><span class="line-content"><span class="syn-plain">doc</span><span class="syn-op">.</span><span class="syn-fn">addWatermark</span><span class="syn-op">(</span><span class="syn-str">"CONFIDENTIAL"</span><span class="syn-op">);</span></span></div>
+                                <div class="code-line"><span class="line-num">7</span><span class="line-content"><span class="syn-plain">doc</span><span class="syn-op">.</span><span class="syn-fn">encrypt</span><span class="syn-op">(</span><span class="syn-type">AES256</span><span class="syn-op">);</span></span></div>
+                                <div class="code-line"><span class="line-num">8</span><span class="line-content"><span class="syn-plain">doc</span><span class="syn-op">.</span><span class="syn-fn">save</span><span class="syn-op">(</span><span class="syn-str">"invoice.pdf"</span><span class="syn-op">);</span></span></div>
+                                <div class="code-line"><span class="line-num">9</span><span class="line-content"></span></div>
+                                <div class="code-line"><span class="line-num">10</span><span class="line-content"><span class="syn-cmt">// Convert to PDF/A for archival</span></span></div>
+                                <div class="code-line"><span class="line-num">11</span><span class="line-content"><span class="syn-type">CPDFConverter</span><span class="syn-op">.</span><span class="syn-fn">toPDFA</span><span class="syn-op">(</span><span class="syn-plain">doc</span><span class="syn-op">,</span> <span class="syn-type">PDFA_3B</span><span class="syn-op">);</span></span></div>
+                            </div>
+                            <!-- Output console -->
+                            <div class="code-output">
+                                <div class="output-dot"></div>
+                                <span class="output-text" data-i18n="hero.output">✓ invoice.pdf — generated successfully</span>
+                                <span class="output-time">23ms</span>
+                            </div>
+                            <!-- Output format badges -->
+                            <div class="code-formats">
+                                <span class="fmt-badge" style="background:rgba(0,207,133,0.12); border:1px solid rgba(0,207,133,0.25); color:rgba(0,207,133,0.8);">PDF</span>
+                                <span class="fmt-badge" style="background:rgba(57,111,250,0.12); border:1px solid rgba(57,111,250,0.25); color:rgba(57,111,250,0.8);">PDF/A</span>
+                                <span class="fmt-badge" style="background:rgba(122,251,255,0.08); border:1px solid rgba(122,251,255,0.2); color:rgba(122,251,255,0.6);">PDF/UA</span>
+                                <span class="fmt-badge" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:rgba(255,255,255,0.35);">PRINT</span>
+                            </div>
+                        </div>
+                        <!-- Floating capabilities card -->
+                        <div class="cap-float-card">
+                            <div class="cap-float-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,207,133,0.7)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span data-i18n="hero.cap1">Generate &amp; Render</span>
+                            </div>
+                            <div class="cap-float-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,207,133,0.7)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span data-i18n="hero.cap2">View &amp; Annotate</span>
+                            </div>
+                            <div class="cap-float-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,207,133,0.7)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span data-i18n="hero.cap3">Convert &amp; Extract</span>
+                            </div>
+                            <div class="cap-float-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(0,207,133,0.7)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span data-i18n="hero.cap4">AI Document Parse</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Bottom gradient for depth -->
+            <div class="hero-banner-depth"></div>
+        </section>
+
+        <!-- ═══════════ VALUE PROPS ═══════════ -->
+        <section class="px-4 sm:px-6 py-12" style="background-color: var(--surface);">
+            <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-4">
+                <article class="feature-card rounded-xl px-6 py-5 flex gap-4 items-start">
+                    <span class="text-2xl">⚡</span>
+                    <div>
+                        <h3 class="font-bold text-[15px] mb-1" data-i18n="vp1.t">High-Performance PDF Generation</h3>
+                        <p class="text-sm text-slate-600" data-i18n="vp1.d">Next-gen engine delivering industry-leading processing speed and layout fidelity for HTML-to-PDF and API-based table generation.</p>
+                    </div>
+                </article>
+                <article class="feature-card rounded-xl px-6 py-5 flex gap-4 items-start">
+                    <span class="text-2xl">💰</span>
+                    <div>
+                        <h3 class="font-bold text-[15px] mb-1" data-i18n="vp2.t">Transparent & Competitive Pricing</h3>
+                        <p class="text-sm text-slate-600" data-i18n="vp2.d">Per-platform / per-feature licensing with no hidden volume limits — delivering a significantly lower Total Cost of Ownership.</p>
+                    </div>
+                </article>
+                <article class="feature-card rounded-xl px-6 py-5 flex gap-4 items-start">
+                    <span class="text-2xl">🛡️</span>
+                    <div>
+                        <h3 class="font-bold text-[15px] mb-1" data-i18n="vp3.t">Clean Commercial License</h3>
+                        <p class="text-sm text-slate-600" data-i18n="vp3.d">100% independently developed IP with a straightforward commercial license. Zero AGPL viral risks, zero surprise true-up fees.</p>
+                    </div>
+                </article>
+                <article class="feature-card rounded-xl px-6 py-5 flex gap-4 items-start">
+                    <span class="text-2xl">🖥️</span>
+                    <div>
+                        <h3 class="font-bold text-[15px] mb-1" data-i18n="vp4.t">Full-Cycle SDK with Built-in UI</h3>
+                        <p class="text-sm text-slate-600" data-i18n="vp4.d">Industrial-grade UI library enabling generate → display → annotate → edit workflows out of the box. No extra front-end dev required.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- ═══════════ COMPARISON TABLE ═══════════ -->
+        <section class="px-4 sm:px-6 py-16 bg-white">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-center" style="color: var(--brand-ink);" data-i18n="cmp.title">ComPDF vs iText: Side-by-Side Comparison</h2>
+                <p class="mt-3 text-center text-slate-500 max-w-3xl mx-auto" data-i18n="cmp.sub">Beyond feature parity, teams evaluate licensing risk, total cost, integration speed, and support quality.</p>
+                <div class="mt-10 rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+                    <table class="w-full text-sm comparison-table">
+                        <thead>
+                            <tr style="background: var(--surface);">
+                                <th class="text-left font-bold px-5 py-3.5 text-slate-700 w-[28%]" data-i18n="cmp.h1">Criteria</th>
+                                <th class="text-left font-bold px-5 py-3.5 w-[36%]" style="color: var(--brand-blue);">ComPDF</th>
+                                <th class="text-left font-bold px-5 py-3.5 text-slate-500 w-[36%]">iText</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="px-5 py-4 font-semibold" data-label="Criteria" data-i18n="cmp.r1c">Document Generation</td>
+                                <td class="px-5 py-4 text-slate-700" data-label="ComPDF" data-i18n="cmp.r1a">Next-gen high-precision engine with dynamic PDF generation, complex logic support, and native API table creation.</td>
+                                <td class="px-5 py-4 text-slate-500" data-label="iText" data-i18n="cmp.r1b">Traditional architecture; robust but less flexible for complex layouts and modern AI integration.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-4 font-semibold" data-label="Criteria" data-i18n="cmp.r2c">Licensing & Cost</td>
+                                <td class="px-5 py-4 text-slate-700" data-label="ComPDF" data-i18n="cmp.r2a">Transparent per-platform pricing with no hidden volume limits. Highly competitive TCO.</td>
+                                <td class="px-5 py-4 text-slate-500" data-label="iText" data-i18n="cmp.r2b">Per-server / per-doc / per-user billing with AGPL open-source viral risks. High compliance costs.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-4 font-semibold" data-label="Criteria" data-i18n="cmp.r3c">Cross-Platform UI</td>
+                                <td class="px-5 py-4 text-slate-700" data-label="ComPDF" data-i18n="cmp.r3a">Built-in industrial-grade UI library for a complete generate–display–annotate–edit workflow.</td>
+                                <td class="px-5 py-4 text-slate-500" data-label="iText" data-i18n="cmp.r3b">Engine-only — no front-end layer. Teams face months of additional UI development cost.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-4 font-semibold" data-label="Criteria" data-i18n="cmp.r4c">Dev Efficiency</td>
+                                <td class="px-5 py-4 text-slate-700" data-label="ComPDF" data-i18n="cmp.r4a">Modern API design, comprehensive docs, and highly responsive 24/5 technical support.</td>
+                                <td class="px-5 py-4 text-slate-500" data-label="iText" data-i18n="cmp.r4b">Steep learning curve with legacy APIs. Premium support requires expensive additional fees.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-4 font-semibold" data-label="Criteria" data-i18n="cmp.r5c">Compliance Risk</td>
+                                <td class="px-5 py-4 text-slate-700" data-label="ComPDF" data-i18n="cmp.r5a">Clean commercial license with fully independent IP. Zero open-source compliance pitfalls.</td>
+                                <td class="px-5 py-4 text-slate-500" data-label="iText" data-i18n="cmp.r5b">Dual AGPL/Commercial licensing prone to legal risks, cumbersome audits, and surprise true-up fees.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-8 text-center">
+                    <button type="button" class="cta-btn btn-primary text-white font-semibold px-8 py-3 rounded-lg" data-i18n="cmp.btn">Get a Detailed Comparison Report</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ WORKFLOWS ═══════════ -->
+        <section class="px-4 sm:px-6 py-16" style="background-color: var(--surface);">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-center" style="color: var(--brand-ink);" data-i18n="wf.title">Core PDF Generation Capabilities</h2>
+                <p class="mt-3 text-center text-slate-500 max-w-3xl mx-auto" data-i18n="wf.sub">From invoices and contracts to compliance forms and analytics reports — ComPDF powers enterprise document pipelines with speed and precision.</p>
+                <div class="mt-10 grid lg:grid-cols-3 gap-6">
+                    <article class="rounded-2xl overflow-hidden border border-slate-200 bg-white hover:shadow-lg transition-shadow">
+                        <img src="https://static.compdf.com/assets/images/sdk/generation/html.png" alt="HTML to PDF workflow" class="w-full h-52 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-slate-900" data-i18n="wf1.t">HTML Template → PDF</h3>
+                            <p class="mt-2 text-sm text-slate-600" data-i18n="wf1.d">Transform HTML/CSS templates with dynamic data binding into pixel-perfect PDFs at scale. Full CSS support including flexbox, grid, and custom fonts.</p>
+                        </div>
+                    </article>
+                    <article class="rounded-2xl overflow-hidden border border-slate-200 bg-white hover:shadow-lg transition-shadow">
+                        <img src="https://static.compdf.com/assets/images/sdk/generation/forms.png" alt="Dynamic PDF form workflow" class="w-full h-52 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-slate-900" data-i18n="wf2.t">Dynamic PDF Forms</h3>
+                            <p class="mt-2 text-sm text-slate-600" data-i18n="wf2.d">Automate form creation and filling for HR, finance, and compliance. Support for interactive fields, checkboxes, dropdowns, and digital signatures.</p>
+                        </div>
+                    </article>
+                    <article class="rounded-2xl overflow-hidden border border-slate-200 bg-white hover:shadow-lg transition-shadow">
+                        <img src="https://static.compdf.com/assets/images/sdk/generation/advanced.png" alt="Server-side API PDF workflow" class="w-full h-52 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-slate-900" data-i18n="wf3.t">Native API Table Generation</h3>
+                            <p class="mt-2 text-sm text-slate-600" data-i18n="wf3.d">Create complex PDF tables directly via API — no browser rendering required. Ideal for server-side, high-volume, and headless environments.</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ BENCHMARK SECTION ═══════════ -->
+        <section class="px-4 sm:px-6 py-16 bg-white">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-center" style="color: var(--brand-ink);" data-i18n="bm.title">Performance Benchmark: ComPDF vs iText</h2>
+                <p class="mt-3 text-center text-slate-500 max-w-3xl mx-auto" data-i18n="bm.sub">Independent benchmark results show ComPDF outperforms iText 9.4.0 across key PDF generation scenarios.</p>
+
+                <!-- Test Environment -->
+                <div class="mt-8 rounded-xl p-5 border border-slate-200" style="background: var(--surface);">
+                    <h3 class="font-bold text-sm text-slate-700 mb-2" data-i18n="bm.env">Test Environment</h3>
+                    <div class="flex flex-wrap gap-x-8 gap-y-1 text-sm text-slate-600">
+                        <span data-i18n-html="bm.envCompdf"><strong>ComPDF:</strong> Java PDF Generation Library V1.0.0</span>
+                        <span data-i18n-html="bm.envItext"><strong>iText:</strong> V9.4.0</span>
+                    </div>
+                </div>
+
+                <!-- Benchmark Table -->
+                <div class="mt-6 rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                    <table class="w-full text-sm benchmark-table">
+                        <thead>
+                            <tr>
+                                <th class="text-left font-bold px-5 py-3 text-slate-700" data-i18n="bm.h1">Test Scenario</th>
+                                <th class="text-center font-bold px-5 py-3" style="color: var(--brand-blue);">ComPDF Generation 1.0.0</th>
+                                <th class="text-center font-bold px-5 py-3 text-slate-500">iText 9.4.0</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Always visible: Overall Performance + Complex Text -->
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s1">Overall Performance</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">3,883 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">1,829 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s2">Complex Text Rendering</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">1,136 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.longer">Takes longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center text-slate-600">569 ms</td>
+                                <td class="px-5 py-2.5 text-center text-green-600 font-medium" data-i18n="bm.faster">Faster</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s3">High-Resolution Image Embedding</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">741 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.longer">Takes longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">557 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.longer">Takes longer</td>
+                            </tr>
+                        </tbody>
+                        <!-- Collapsible rows -->
+                        <tbody id="benchmarkMore" style="display:none;">
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s4">Border CSS Style Rendering</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">240 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">61 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s5">Complex Table Structure & Style</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">419 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">129 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s6">Color & Blended CSS Rendering</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">227 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">69 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.muchLonger">Takes much longer</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s7">Nested Block-Level Elements</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">303 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.longer">Takes longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">106 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.longer">Takes longer</td>
+                            </tr>
+                            <tr class="border-b border-slate-100">
+                                <td class="px-5 py-3 font-semibold" colspan="3" style="background:var(--surface); color: var(--brand-ink);" data-i18n="bm.s8">Multi-level Lists & Custom Bullets</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.st">Single-threaded</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">423 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.longer">Takes longer</td>
+                            </tr>
+                            <tr>
+                                <td class="px-5 py-2.5 pl-8 text-slate-600" data-i18n="bm.mt">Multi-threaded (8)</td>
+                                <td class="px-5 py-2.5 text-center benchmark-win">201 ms</td>
+                                <td class="px-5 py-2.5 text-center benchmark-lose" data-i18n="bm.longer">Takes longer</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- Expand / Collapse toggle -->
+                    <button id="benchmarkToggle" onclick="toggleBenchmark()" class="w-full py-3 text-sm font-semibold text-center border-t border-slate-200 hover:bg-slate-50 transition-colors" style="color: var(--brand-blue);">
+                        <span id="benchmarkToggleText" data-i18n="bm.expand">Show All Test Results ▼</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ CONTACT + WHY CHOOSE (symmetric) ═══════════ -->
+        <section id="contact-form" class="px-4 sm:px-6 py-16" style="background: var(--brand-ink);">
+            <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8 items-start">
+                <!-- Why Choose ComPDF -->
+                <aside class="rounded-2xl border border-slate-600/40 bg-white/5 backdrop-blur p-6 sm:p-8 text-white order-2 lg:order-1">
+                    <h3 class="text-2xl font-bold mb-6" data-i18n="why.title">Why Choose ComPDF</h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-3 items-start">
+                            <span class="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--brand-blue); color: #fff;">1</span>
+                            <div>
+                                <p class="font-semibold" data-i18n="why.1t">Enterprise-Grade Performance</p>
+                                <p class="text-sm text-slate-300 mt-1" data-i18n="why.1d">Outperforms iText in 8 out of 9 benchmark categories with both single and multi-threaded workloads.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 items-start">
+                            <span class="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--brand-blue); color: #fff;">2</span>
+                            <div>
+                                <p class="font-semibold" data-i18n="why.2t">Transparent, Predictable Pricing</p>
+                                <p class="text-sm text-slate-300 mt-1" data-i18n="why.2d">No per-document fees, no surprise audits. Budget with confidence using per-platform or per-feature licensing.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 items-start">
+                            <span class="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--brand-blue); color: #fff;">3</span>
+                            <div>
+                                <p class="font-semibold" data-i18n="why.3t">Zero Open-Source Compliance Risk</p>
+                                <p class="text-sm text-slate-300 mt-1" data-i18n="why.3d">100% independent IP with a clean commercial license. No AGPL viral risk, no cumbersome legal audits.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 items-start">
+                            <span class="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--brand-blue); color: #fff;">4</span>
+                            <div>
+                                <p class="font-semibold" data-i18n="why.4t">24/5 Dedicated Technical Support</p>
+                                <p class="text-sm text-slate-300 mt-1" data-i18n="why.4d">One-on-one support with comprehensive docs, regular updates, and end-to-end migration guidance.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 items-start">
+                            <span class="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--brand-blue); color: #fff;">5</span>
+                            <div>
+                                <p class="font-semibold" data-i18n="why.5t">Flexible Deployment Options</p>
+                                <p class="text-sm text-slate-300 mt-1" data-i18n="why.5d">Cloud API, self-hosted, or hybrid — deploy on your terms with support for Java, C#, C++, Web, and mobile.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </aside>
+                <!-- Contact Form (compact) -->
+                <div class="rounded-2xl bg-white text-slate-900 p-6 sm:p-8 order-1 lg:order-2">
+                    <h2 class="text-xl sm:text-2xl font-extrabold" data-i18n="form.title">Get Started with ComPDF</h2>
+                    <p class="mt-2 text-slate-500 text-sm" data-i18n="form.sub">Tell us about your project and we'll provide a tailored evaluation plan.</p>
+                    <form id="leadForm" class="mt-5 space-y-3">
+                        <div class="grid sm:grid-cols-2 gap-3">
+                            <div>
+                                <label for="fullName" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.name">Full Name *</label>
+                                <input id="fullName" name="fullName" type="text" required class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                            </div>
+                            <div>
+                                <label for="workEmail" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.email">Work Email *</label>
+                                <input id="workEmail" name="workEmail" type="email" required class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                            </div>
+                        </div>
+                        <div class="grid sm:grid-cols-2 gap-3">
+                            <div>
+                                <label for="phone" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.phone">Phone</label>
+                                <input id="phone" name="phone" type="tel" class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                            </div>
+                            <div>
+                                <label for="itextVersion" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.pdflib">Current PDF Library</label>
+                                <input id="itextVersion" name="itextVersion" type="text" data-i18n-ph="form.ph.pdflib" placeholder="e.g., iText 7 / iText 9.x" class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="projectDescription" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.project">Project Description</label>
+                            <textarea id="projectDescription" name="projectDescription" rows="3" class="block w-full border border-gray-300 rounded-md p-2 text-sm" data-i18n-ph="form.ph.project" placeholder="Document types, volume, deployment needs, timeline..."></textarea>
+                        </div>
+                        <button type="submit" class="w-full btn-primary text-white font-bold py-2.5 rounded-lg text-sm" data-i18n="form.submit">Submit</button>
+                    </form>
+                    <p class="mt-3 text-[11px] text-slate-400" data-i18n-html="form.privacy">By submitting, you agree to the <a href="https://www.compdf.com/privacy-policy" target="_blank" class="underline">Privacy Policy</a>. Your data will be kept confidential.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ═══════════ FLOATING SIDEBAR BUTTON ═══════════ -->
+    <div id="floatingSidebar" style="position:fixed; right:20px; top:50%; transform:translateY(-50%); z-index:50; transition:opacity 0.3s, visibility 0.3s; opacity:0; visibility:hidden;">
+        <button type="button" id="sidebarCta" class="group" style="width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg, #396FFA, #244FF0); border:none; cursor:pointer; box-shadow:0 4px 20px rgba(57,111,250,0.4); display:flex; align-items:center; justify-content:center; transition:transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 6px 28px rgba(57,111,250,0.55)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 20px rgba(57,111,250,0.4)';" aria-label="Contact us">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </button>
+    </div>
+
+    <!-- ═══════════ MODAL ═══════════ -->
+    <div id="leadModal" class="modal items-center justify-center px-4">
+        <div class="bg-white p-6 sm:p-8 rounded-xl w-full max-w-lg relative shadow-2xl text-slate-900">
+            <button id="closeModal" class="absolute top-3 right-4 text-gray-500 hover:text-gray-800 text-3xl leading-none" aria-label="Close">&times;</button>
+            <h2 class="text-xl font-bold mb-2 text-center" data-i18n="form.title">Get Started with ComPDF</h2>
+            <p class="text-sm text-slate-500 text-center mb-5" data-i18n="form.sub">Tell us about your project and we'll provide a tailored evaluation plan.</p>
+            <form id="leadModalForm" class="space-y-3">
+                <div class="grid sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="modalFullName" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.name">Full Name *</label>
+                        <input id="modalFullName" name="fullName" type="text" required class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="modalWorkEmail" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.email">Work Email *</label>
+                        <input id="modalWorkEmail" name="workEmail" type="email" required class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                    </div>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="modalPhone" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.phone">Phone</label>
+                        <input id="modalPhone" name="phone" type="tel" class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="modalItextVersion" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.pdflib">Current PDF Library</label>
+                        <input id="modalItextVersion" name="itextVersion" type="text" data-i18n-ph="form.ph.pdflib" placeholder="e.g., iText 7 / iText 9.x" class="block w-full border border-gray-300 rounded-md p-2 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label for="modalProjectDescription" class="block text-xs font-medium text-gray-600 mb-1" data-i18n="form.project">Project Description</label>
+                    <textarea id="modalProjectDescription" name="projectDescription" rows="3" class="block w-full border border-gray-300 rounded-md p-2 text-sm" data-i18n-ph="form.ph.project" placeholder="Document types, volume, deployment needs, timeline..."></textarea>
+                </div>
+                <button type="submit" class="w-full btn-primary text-white font-bold py-2.5 rounded-lg text-sm" data-i18n="form.submit">Submit</button>
+            </form>
+            <p class="mt-3 text-[11px] text-slate-400" data-i18n-html="form.privacy">By submitting, you agree to the <a href="https://www.compdf.com/privacy-policy" target="_blank" class="underline">Privacy Policy</a>. Your data will be kept confidential.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════ THANK YOU MODAL ═══════════ -->
+    <div id="thankYouModal" class="modal items-center justify-center px-4">
+        <div class="bg-white p-8 sm:p-10 rounded-xl w-full max-w-md relative shadow-2xl text-center">
+            <button onclick="document.getElementById('thankYouModal').style.display='none'" class="absolute top-3 right-4 text-gray-400 hover:text-gray-700 text-2xl leading-none" aria-label="Close">&times;</button>
+            <!-- Check icon with sparkles -->
+            <div class="flex justify-center mb-5">
+                <div style="position:relative; width:72px; height:72px;">
+                    <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="36" cy="36" r="32" fill="#E0F7EF"/>
+                        <circle cx="36" cy="36" r="24" fill="#34D399"/>
+                        <path d="M26 36l7 7 13-13" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <!-- Sparkles -->
+                    <svg width="14" height="14" viewBox="0 0 14 14" style="position:absolute;top:4px;right:-2px;" fill="none"><path d="M7 0l1.5 5.5L14 7l-5.5 1.5L7 14l-1.5-5.5L0 7l5.5-1.5z" fill="#7AFBFF" opacity="0.7"/></svg>
+                    <svg width="10" height="10" viewBox="0 0 14 14" style="position:absolute;top:0px;left:8px;" fill="none"><path d="M7 0l1.5 5.5L14 7l-5.5 1.5L7 14l-1.5-5.5L0 7l5.5-1.5z" fill="#34D399" opacity="0.5"/></svg>
+                    <svg width="8" height="8" viewBox="0 0 14 14" style="position:absolute;bottom:8px;right:-6px;" fill="none"><path d="M7 0l1.5 5.5L14 7l-5.5 1.5L7 14l-1.5-5.5L0 7l5.5-1.5z" fill="#396FFA" opacity="0.4"/></svg>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-3" data-i18n="ty.title">Thank you for contacting us!</h3>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6" data-i18n-html="ty.desc">We have received your message.<br>We will be in touch in 1 business day.</p>
+            <div class="flex gap-3 justify-center mb-5">
+                <a href="https://www.compdf.com/" target="_blank" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-semibold text-white" style="background:var(--brand-blue);" data-i18n="ty.home">back to homepage</a>
+                <a href="https://www.compdf.com/blog/categories/tutorials" target="_blank" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-semibold border" style="color:var(--brand-blue); border-color:var(--brand-blue);" data-i18n="ty.tutorials">learn more tutorials</a>
+            </div>
+            <p class="text-xs text-slate-400 mb-3" data-i18n="ty.follow">Follow Us</p>
+            <div class="flex justify-center gap-3">
+                <a href="https://x.com/compaborc" target="_blank" class="text-slate-400 hover:text-slate-600 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                <a href="https://www.facebook.com/compdfkit/" target="_blank" class="text-slate-400 hover:text-slate-600 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                <a href="https://www.linkedin.com/company/pdf-technologies-pte-ltd/" target="_blank" class="text-slate-400 hover:text-slate-600 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+                <a href="https://github.com/ComPDFKit" target="_blank" class="text-slate-400 hover:text-slate-600 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg></a>
+                <a href="https://teams.live.com/l/invite/FBA64jvHjv4M6oPcwE" target="_blank" class="text-slate-400 hover:text-slate-600 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.2 6.4a2.4 2.4 0 1 0-4.8 0 2.4 2.4 0 0 0 4.8 0m-7.7 1.2H4.4A1.4 1.4 0 0 0 3 9v7a1.4 1.4 0 0 0 1.4 1.4h7.1A1.4 1.4 0 0 0 12.9 16V9a1.4 1.4 0 0 0-1.4-1.4m5.3.4h-3v6.4a2.4 2.4 0 0 1-2.4 2.4h-1v.8A2.4 2.4 0 0 0 12.8 19.6h4.8A2.4 2.4 0 0 0 20 17.2v-4.4a2.4 2.4 0 0 0-3.2-2.8"/><text x="5.5" y="14.5" font-size="6" font-weight="700" fill="currentColor">T</text></svg></a>
+                <a href="https://www.youtube.com/@ComPDF" target="_blank" class="text-slate-400 hover:text-slate-600 transition-colors"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ FOOTER (compdf.com replica) ═══════════ -->
+    <footer style="background-color: var(--footer-bg); color: #fff;">
+        <div class="max-w-[1200px] mx-auto px-5 pt-10 pb-6">
+            <!-- Logo + Social icons row -->
+            <div class="flex items-center gap-6 mb-8 pb-6 border-b border-white/20">
+                <a href="https://www.compdf.com/" target="_blank" rel="noopener" class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="176" height="40" fill="none" viewBox="0 0 176 40" class="h-8 w-auto"><g clip-path="url(#ftlogo_a)"><mask id="ftlogo_b" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_b)"><path fill="#00C4A1" d="M36.649 7.492a3.426 3.426 0 0 1 3.426 3.426v25.691a3.426 3.426 0 0 1-3.426 3.426h-23.98a3.426 3.426 0 0 1-3.425-3.426v-3.996H30.94V24.62h-9.135a4.567 4.567 0 0 1 0-9.135h9.135V7.492z"/></g><mask id="ftlogo_c" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_c)"><path fill="#0071F5" d="M27.514.07H3.534A3.425 3.425 0 0 0 .11 3.495v25.692a3.425 3.425 0 0 0 3.426 3.425h18.27c-6.937 0-12.56-5.623-12.56-12.56s5.623-12.56 12.56-12.56h9.135V3.495A3.426 3.426 0 0 0 27.514.07"/></g><mask id="ftlogo_d" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_d)"><path fill="#fff" d="M133.299 23.18h-3.251v-8.065h3.224c2.873 0 4.552.997 4.552 4.019 0 2.751-1.301 4.046-4.525 4.046m.109-10.278h-6.096V31.38h2.736v-5.99h3.089c2.763 0 4.66-.376 6.042-1.86.947-1.052 1.435-2.563 1.435-4.371 0-1.833-.434-3.48-1.544-4.612-1.327-1.349-3.224-1.646-5.662-1.646"/></g><mask id="ftlogo_e" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_e)"><path fill="#fff" d="M151.178 29.115h-4.037v-13.92h4.118c4.118 0 6.205 2.401 6.205 6.96 0 4.748-1.951 6.96-6.286 6.96m.027-16.213h-6.799V31.38h6.745c2.358 0 4.687-.458 6.393-1.835 1.843-1.482 2.764-3.911 2.764-7.418 0-3.453-.975-5.907-2.791-7.39-1.707-1.376-3.955-1.836-6.312-1.836"/></g><mask id="ftlogo_f" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_f)"><path fill="#fff" d="M175.891 15.222v-2.32h-11.703V31.38h2.735v-7.5h7.802v-2.238h-7.802v-6.42z"/></g><mask id="ftlogo_g" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_g)"><path fill="#fff" d="M64.48 31.748c-4.1 0-5.96-.427-7.911-1.913-1.574-1.2-2.956-3.637-2.956-7.708 0-4.742 1.79-6.98 3.648-8.11 2.322-1.414 5.328-1.483 8.201-1.483 2.099 0 4.253.135 6.6.324v3.314c-2.016-.162-4.501-.296-6.434-.296-3.683 0-7.656.27-7.656 6.265 0 5.854 4.524 6.166 6.08 6.166 2.865 0 5.497-.601 8.424-1.194v3.513c-2.927.566-5.557 1.122-7.996 1.122"/></g><mask id="ftlogo_h" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_h)"><path fill="#fff" d="M82.911 20.241c-3.453 0-4.973 1.132-4.973 4.231s1.494 4.42 4.973 4.42c3.427 0 4.922-1.105 4.922-4.204s-1.469-4.447-4.922-4.447m6.237 10.079c-1.598 1.132-3.686 1.428-6.237 1.428-2.603 0-4.69-.323-6.262-1.428-1.804-1.24-2.448-3.288-2.448-5.74s.644-4.527 2.448-5.767c1.572-1.105 3.66-1.428 6.262-1.428 2.577 0 4.639.323 6.237 1.428 1.804 1.24 2.422 3.314 2.422 5.74 0 2.452-.645 4.527-2.422 5.767"/></g><mask id="ftlogo_i" width="256" height="120" x="-40" y="-40" maskUnits="userSpaceOnUse" style="mask-type:luminance"><path fill="#fff" d="M-39.373-39.53h254.745V79.504H-39.373z"/></mask><g mask="url(#ftlogo_i)"><path fill="#fff" d="M117.801 31.371v-7.519c0-2.479-1.159-3.368-3.144-3.368-1.304 0-2.924.352-4.593.778a.557.557 0 0 0-.415.635c.063.359.086.747.086 1.147v8.327h-3.633v-7.519c0-2.479-1.134-3.368-3.119-3.368-1.366 0-3.033.36-4.53.751a.56.56 0 0 0-.417.546v9.59h-3.634V17.762h2.415s.12 1.07.678.863c1.553-.58 4.612-1.24 6.648-1.24 1.211 0 2.5.162 3.556.89.203.123.361.235.504.358a.55.55 0 0 0 .527.108c1.933-.606 5.084-1.356 7.087-1.356 1.52 0 3.092.243 4.251 1.401.955.97 1.341 2.317 1.341 4.258v8.327z"/></g></g><defs><clipPath id="ftlogo_a"><path fill="#fff" d="M0 0h176v40H0z"/></clipPath></defs></svg>
+                </a>
+                <div class="flex items-center gap-3">
+                    <a href="https://x.com/compaborc" target="_blank" rel="noopener" class="footer-social" aria-label="X / Twitter">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-white/60 hover:text-white transition-colors"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="https://www.facebook.com/compdfkit/" target="_blank" rel="noopener" class="footer-social" aria-label="Facebook">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-white/60 hover:text-white transition-colors"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                    </a>
+                    <a href="https://www.linkedin.com/company/pdf-technologies-pte-ltd/" target="_blank" rel="noopener" class="footer-social" aria-label="LinkedIn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-white/60 hover:text-white transition-colors"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </a>
+                    <a href="https://github.com/ComPDFKit" target="_blank" rel="noopener" class="footer-social" aria-label="GitHub">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-white/60 hover:text-white transition-colors"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </a>
+                    <a href="https://teams.live.com/l/invite/FBA64jvHjv4M6oPcwE" target="_blank" rel="noopener" class="footer-social" aria-label="Teams">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-white/60 hover:text-white transition-colors"><path d="M19.2 6.4a2.4 2.4 0 1 0-4.8 0 2.4 2.4 0 0 0 4.8 0m-7.7 1.2H4.4A1.4 1.4 0 0 0 3 9v7a1.4 1.4 0 0 0 1.4 1.4h7.1A1.4 1.4 0 0 0 12.9 16V9a1.4 1.4 0 0 0-1.4-1.4m5.3.4h-3v6.4a2.4 2.4 0 0 1-2.4 2.4h-1v.8A2.4 2.4 0 0 0 12.8 19.6h4.8A2.4 2.4 0 0 0 20 17.2v-4.4a2.4 2.4 0 0 0-3.2-2.8"/><text x="5.5" y="14.5" font-size="6" font-weight="700" fill="currentColor">T</text></svg>
+                    </a>
+                    <a href="https://www.youtube.com/@ComPDF" target="_blank" rel="noopener" class="footer-social" aria-label="YouTube">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="text-white/60 hover:text-white transition-colors"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Link grid — 5 columns matching compdf.com (Solutions spans 2) -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-x-8 gap-y-8 pb-10 border-b border-white/20 text-[14px] leading-[20px]">
+
+                <!-- Column 1: Popular Products -->
+                <div>
+                    <p class="footer-title border-b border-white/20 pb-3 mb-4" data-i18n="ft.c1">Popular Products</p>
+                    <ul class="space-y-3">
+                        <li><a class="footer-link" href="https://www.compdf.com/pdf-sdk" target="_blank">PDF SDK</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/conversion/office-files" target="_blank" data-i18n="ft.l.conversion">Conversion SDK</a></li>
+                        <li><a class="footer-link flex items-center gap-1.5" href="https://www.compdf.com/pdf-sdk/pdf-generation" target="_blank"><span data-i18n="ft.l.pdfgen">PDF Generation</span> <span class="bg-[#00CF85] text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none">New</span></a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/server" target="_blank" data-i18n="ft.l.server">Server SDK</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/web" target="_blank">Web SDK</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/pdf-sdk/data-extraction" target="_blank" data-i18n="ft.l.aiparse">AI Document Parsing</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/ai/intelligent-document-extraction" target="_blank" data-i18n="ft.l.aiextract">AI Document Extraction</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/ai/enterprise-knowledge-base" target="_blank" data-i18n="ft.l.kb">Enterprise Knowledge Base</a></li>
+                        <li><a class="footer-link" href="https://api.compdf.com/signup" target="_blank">Open API</a></li>
+                        <li><a class="footer-link" href="https://api.compdf.com/login" target="_blank" data-i18n="ft.l.loginapi">Login to API</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 2: Developers -->
+                <div>
+                    <p class="footer-title border-b border-white/20 pb-3 mb-4" data-i18n="ft.c2">Developers</p>
+                    <!-- Documentation sub-group -->
+                    <p class="text-[13px] text-white font-medium mb-2" data-i18n="ft.sub.docs">Documentation</p>
+                    <ul class="space-y-3 mb-5">
+                        <li><a class="footer-link" href="https://www.compdf.com/guides/pdf-sdk/web/overview" target="_blank" data-i18n="ft.l.webguide">Web Guides</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/guides/pdf-sdk/java/overview" target="_blank" data-i18n="ft.l.javaguide">Java Guides</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/guides/pdf-sdk/dotnet-core/overview" target="_blank" data-i18n="ft.l.netguide">.NET Guides</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/guides/pdf-sdk/android/overview" target="_blank" data-i18n="ft.l.androidguide">Android Guides</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/guides/pdf-sdk/ios/overview" target="_blank" data-i18n="ft.l.iosguide">iOS Guides</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/guides/pdf-sdk/flutter/overview" target="_blank" data-i18n="ft.l.flutterguide">Flutter Guides</a></li>
+                        <li><a class="footer-link" href="https://api.compdf.com/api-reference/overview" target="_blank" data-i18n="ft.l.apiref">API Reference</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/guides/idp/self-hosted-deployment/overview" target="_blank" data-i18n="ft.l.selfhost">Self-hosted Docs</a></li>
+                    </ul>
+                    <!-- Community sub-group -->
+                    <p class="text-[13px] text-white font-medium mb-2" data-i18n="ft.sub.comm">Community</p>
+                    <ul class="space-y-3">
+                        <li><a class="footer-link" href="https://www.compdf.com/pricing?tag=free-trial" target="_blank" data-i18n="ft.l.freetrial">Free Trial</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/support" target="_blank" data-i18n="ft.l.techsup">Technical Support</a></li>
+                        <li><a class="footer-link" href="https://github.com/ComPDFKit" target="_blank">GitHub</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Solutions (spans 2 grid columns, 2 internal sub-columns) -->
+                <div class="md:col-span-2">
+                    <p class="footer-title border-b border-white/20 pb-3 mb-4" data-i18n="ft.c3">Solutions</p>
+                    <div class="flex px-2">
+                        <!-- Sub-col left: Industry Solutions -->
+                        <div class="flex-1">
+                            <p class="text-[13px] text-white font-medium mb-2" data-i18n="ft.sub.industry">Industry Solutions</p>
+                            <ul class="space-y-3">
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/construction" target="_blank" data-i18n="ft.l.construction">Construction</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/education" target="_blank" data-i18n="ft.l.education">Education</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/aviation" target="_blank" data-i18n="ft.l.aviation">Aviation</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/printing" target="_blank" data-i18n="ft.l.printing">Printing</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/manufacturing" target="_blank" data-i18n="ft.l.manufacturing">Manufacturing</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/healthcare" target="_blank" data-i18n="ft.l.healthcare">Healthcare</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/finance" target="_blank" data-i18n="ft.l.finance">Finance</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/government" target="_blank" data-i18n="ft.l.government">Government</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/solutions/communitylicense" target="_blank" data-i18n="ft.l.commlicense">Community License</a></li>
+                            </ul>
+                        </div>
+                        <!-- Sub-col right: Web Integrations + Low-Code -->
+                        <div class="flex-1">
+                            <p class="text-[13px] text-white font-medium mb-2" data-i18n="ft.sub.web">Web Integrations</p>
+                            <ul class="space-y-3 mb-5">
+                                <li><a class="footer-link" href="https://www.compdf.com/pdf-sdk/salesforce" target="_blank">Salesforce</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/pdf-sdk/sharepoint" target="_blank">SharePoint</a></li>
+                                <li><a class="footer-link" href="javascript:;" target="_blank">OneDrive</a></li>
+                                <li><a class="footer-link" href="javascript:;" target="_blank">Teams</a></li>
+                            </ul>
+                            <p class="text-[13px] text-white font-medium mb-2" data-i18n="ft.sub.lowcode">Low-Code</p>
+                            <ul class="space-y-3">
+                                <li><a class="footer-link" href="https://www.compdf.com/low-code" target="_blank">Make</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/low-code" target="_blank">Zapier</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/low-code" target="_blank">Power Automate</a></li>
+                                <li><a class="footer-link" href="https://www.compdf.com/low-code" target="_blank">OutSystems</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 4: Company & Resources -->
+                <div>
+                    <p class="footer-title border-b border-white/20 pb-3 mb-4" data-i18n="ft.c4">Company & Resources</p>
+                    <!-- Company -->
+                    <p class="text-[13px] text-white font-medium mb-2" data-i18n="ft.sub.company">Company</p>
+                    <ul class="space-y-3 mb-5">
+                        <li><a class="footer-link" href="https://www.compdf.com/company/about" target="_blank" data-i18n="ft.l.about">About Us</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/contact-sales" target="_blank" data-i18n="ft.l.contact">Contact Us</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/press" target="_blank" data-i18n="ft.l.press">Press Kit & Sales Kit</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/reseller" target="_blank" data-i18n="ft.l.reseller">Become Our Reseller</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/partner" target="_blank" data-i18n="ft.l.partners">Partners</a></li>
+                    </ul>
+                    <!-- Resources -->
+                    <p class="text-[13px] text-white font-medium mb-2" data-i18n="ft.sub.resources">Resources</p>
+                    <ul class="space-y-3">
+                        <li><a class="footer-link" href="https://www.compdf.com/blog" target="_blank" data-i18n="ft.l.blog">Blog</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/blog/categories/case-study" target="_blank" data-i18n="ft.l.casestudies">Case Studies</a></li>
+                        <li><a class="footer-link" href="https://www.compdf.com/faq" target="_blank" data-i18n="ft.l.faq">Technical FAQs</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom legal bar -->
+            <div class="flex flex-col md:flex-row justify-between items-center gap-3 pt-4 text-[14px] leading-[20px] text-white/60">
+                <span data-i18n="ft.copyright">© 2014-2026 PDF Technologies, Inc., a KDAN Company. All Rights Reserved.</span>
+                <div class="flex flex-wrap gap-x-2 items-center">
+                    <a class="footer-link hover:underline" href="https://www.compdf.com/privacy-policy" target="_blank" data-i18n="ft.legal.privacy">Privacy Policy</a>
+                    <span class="text-white/30">|</span>
+                    <a class="footer-link hover:underline" href="https://www.compdf.com/terms-of-service" target="_blank" data-i18n="ft.legal.terms">Service Terms</a>
+                    <span class="text-white/30">|</span>
+                    <a class="footer-link hover:underline" href="javascript:void(0)" data-i18n="ft.legal.cookie">Cookie Settings</a>
+                    <span class="text-white/30">|</span>
+                    <a class="footer-link hover:underline" href="https://www.compdf.com/security" target="_blank" data-i18n="ft.legal.security">Security Policy</a>
+                    <span class="text-white/30">|</span>
+                    <a class="footer-link hover:underline" href="https://www.compdf.com/trust/gdpr" target="_blank">GDPR</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ═══════════ i18n Dictionary ═══════════
+        const I18N = {
+            en: {
+                'nav.trial': 'Free Trial', 'nav.contact': 'Contact Sales',
+                'hero.badge': 'ComPDF vs iText — A Smarter Choice',
+                'hero.t1': 'Same Capabilities.', 'hero.t2': 'Better Value.', 'hero.t3': 'Faster Integration.',
+                'hero.desc': "ComPDF delivers enterprise-grade PDF generation with the features you expect from iText — plus native API table creation, transparent pricing, and 24/5 dedicated support. Accelerate your document workflows without the overhead.",
+                'hero.cta1': 'Start Free Trial', 'hero.cta2': 'Request Technical Consultation',
+                'hero.output': '✓ invoice.pdf — generated successfully',
+                'hero.cap1': 'Generate & Render', 'hero.cap2': 'View & Annotate',
+                'hero.cap3': 'Convert & Extract', 'hero.cap4': 'AI Document Parse',
+                'vp1.t': 'High-Performance PDF Generation',
+                'vp1.d': 'Next-gen engine delivering industry-leading processing speed and layout fidelity for HTML-to-PDF and API-based table generation.',
+                'vp2.t': 'Transparent & Competitive Pricing',
+                'vp2.d': 'Per-platform / per-feature licensing with no hidden volume limits — delivering a significantly lower Total Cost of Ownership.',
+                'vp3.t': 'Clean Commercial License',
+                'vp3.d': '100% independently developed IP with a straightforward commercial license. Zero AGPL viral risks, zero surprise true-up fees.',
+                'vp4.t': 'Full-Cycle SDK with Built-in UI',
+                'vp4.d': 'Industrial-grade UI library enabling generate → display → annotate → edit workflows out of the box. No extra front-end dev required.',
+                'cmp.title': 'ComPDF vs iText: Side-by-Side Comparison',
+                'cmp.sub': 'Beyond feature parity, teams evaluate licensing risk, total cost, integration speed, and support quality.',
+                'cmp.h1': 'Criteria',
+                'cmp.r1c': 'Document Generation',
+                'cmp.r1a': 'Next-gen high-precision engine with dynamic PDF generation, complex logic support, and native API table creation.',
+                'cmp.r1b': 'Traditional architecture; robust but less flexible for complex layouts and modern AI integration.',
+                'cmp.r2c': 'Licensing & Cost',
+                'cmp.r2a': 'Transparent per-platform pricing with no hidden volume limits. Highly competitive TCO.',
+                'cmp.r2b': 'Per-server / per-doc / per-user billing with AGPL open-source viral risks. High compliance costs.',
+                'cmp.r3c': 'Cross-Platform UI',
+                'cmp.r3a': 'Built-in industrial-grade UI library for a complete generate–display–annotate–edit workflow.',
+                'cmp.r3b': 'Engine-only — no front-end layer. Teams face months of additional UI development cost.',
+                'cmp.r4c': 'Dev Efficiency',
+                'cmp.r4a': 'Modern API design, comprehensive docs, and highly responsive 24/5 technical support.',
+                'cmp.r4b': 'Steep learning curve with legacy APIs. Premium support requires expensive additional fees.',
+                'cmp.r5c': 'Compliance Risk',
+                'cmp.r5a': 'Clean commercial license with fully independent IP. Zero open-source compliance pitfalls.',
+                'cmp.r5b': 'Dual AGPL/Commercial licensing prone to legal risks, cumbersome audits, and surprise true-up fees.',
+                'cmp.btn': 'Get a Detailed Comparison Report',
+                'wf.title': 'Core PDF Generation Capabilities',
+                'wf.sub': 'From invoices and contracts to compliance forms and analytics reports — ComPDF powers enterprise document pipelines with speed and precision.',
+                'wf1.t': 'HTML Template → PDF',
+                'wf1.d': 'Transform HTML/CSS templates with dynamic data binding into pixel-perfect PDFs at scale. Full CSS support including flexbox, grid, and custom fonts.',
+                'wf2.t': 'Dynamic PDF Forms',
+                'wf2.d': 'Automate form creation and filling for HR, finance, and compliance. Support for interactive fields, checkboxes, dropdowns, and digital signatures.',
+                'wf3.t': 'Native API Table Generation',
+                'wf3.d': 'Create complex PDF tables directly via API — no browser rendering required. Ideal for server-side, high-volume, and headless environments.',
+                'bm.title': 'Performance Benchmark: ComPDF vs iText',
+                'bm.sub': 'Independent benchmark results show ComPDF outperforms iText 9.4.0 across key PDF generation scenarios.',
+                'bm.env': 'Test Environment',
+                'bm.envCompdf': '<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0',
+                'bm.envItext': '<strong>iText:</strong> V9.4.0',
+                'bm.h1': 'Test Scenario',
+                'bm.s1': 'Overall Performance', 'bm.s2': 'Complex Text Rendering',
+                'bm.s3': 'High-Resolution Image Embedding', 'bm.s4': 'Border CSS Style Rendering',
+                'bm.s5': 'Complex Table Structure & Style', 'bm.s6': 'Color & Blended CSS Rendering',
+                'bm.s7': 'Nested Block-Level Elements', 'bm.s8': 'Multi-level Lists & Custom Bullets',
+                'bm.st': 'Single-threaded', 'bm.mt': 'Multi-threaded (8)',
+                'bm.muchLonger': 'Takes much longer', 'bm.longer': 'Takes longer', 'bm.faster': 'Faster',
+                'bm.expand': 'Show All Test Results ▼', 'bm.collapse': 'Collapse ▲',
+                'why.title': 'Why Choose ComPDF',
+                'why.1t': 'Enterprise-Grade Performance',
+                'why.1d': 'Outperforms iText in 8 out of 9 benchmark categories with both single and multi-threaded workloads.',
+                'why.2t': 'Transparent, Predictable Pricing',
+                'why.2d': 'No per-document fees, no surprise audits. Budget with confidence using per-platform or per-feature licensing.',
+                'why.3t': 'Zero Open-Source Compliance Risk',
+                'why.3d': '100% independent IP with a clean commercial license. No AGPL viral risk, no cumbersome legal audits.',
+                'why.4t': '24/5 Dedicated Technical Support',
+                'why.4d': 'One-on-one support with comprehensive docs, regular updates, and end-to-end migration guidance.',
+                'why.5t': 'Flexible Deployment Options',
+                'why.5d': 'Cloud API, self-hosted, or hybrid — deploy on your terms with support for Java, C#, C++, Web, and mobile.',
+                'form.title': 'Get Started with ComPDF',
+                'form.sub': "Tell us about your project and we'll provide a tailored evaluation plan.",
+                'form.name': 'Full Name *', 'form.email': 'Work Email *', 'form.phone': 'Phone',
+                'form.pdflib': 'Current PDF Library', 'form.ph.pdflib': 'e.g., iText 7 / iText 9.x',
+                'form.project': 'Project Description',
+                'form.ph.project': 'Document types, volume, deployment needs, timeline...',
+                'form.submit': 'Submit',
+                'form.privacy': 'By submitting, you agree to the <a href="https://www.compdf.com/privacy-policy" target="_blank" class="underline">Privacy Policy</a>. Your data will be kept confidential.',
+                'form.alert': 'Thank you! A ComPDF specialist will contact you shortly.',
+                'val.required': 'This field is required.', 'val.email': 'Please enter a valid email address.',
+                'val.tooShort': 'Please enter at least {minLength} characters.',
+                'val.pattern': 'Please match the requested format.',
+                'ft.c1': 'Popular Products', 'ft.c2': 'Developers', 'ft.c3': 'Solutions', 'ft.c4': 'Company & Resources',
+                'ft.sub.docs': 'Documentation', 'ft.sub.comm': 'Community',
+                'ft.sub.industry': 'Industry Solutions', 'ft.sub.web': 'Web Integrations', 'ft.sub.lowcode': 'Low-Code',
+                'ft.sub.company': 'Company', 'ft.sub.resources': 'Resources',
+                'ft.copyright': '© 2014-2026 PDF Technologies, Inc., a KDAN Company. All Rights Reserved.',
+                'ft.legal.privacy': 'Privacy Policy', 'ft.legal.terms': 'Service Terms', 'ft.legal.security': 'Security Policy', 'ft.legal.cookie': 'Cookie Settings',
+                'ft.l.conversion': 'Conversion SDK', 'ft.l.pdfgen': 'PDF Generation', 'ft.l.server': 'Server SDK',
+                'ft.l.aiparse': 'AI Document Parsing','ft.l.aiextract': 'AI Document Extraction', 'ft.l.kb': 'Enterprise Knowledge Base', 'ft.l.loginapi': 'Login to API',
+                'ft.l.webguide': 'Web Guides', 'ft.l.javaguide': 'Java Guides', 'ft.l.netguide': '.NET Guides', 'ft.l.androidguide': 'Android Guides',
+                'ft.l.iosguide': 'iOS Guides', 'ft.l.flutterguide': 'Flutter Guides', 'ft.l.apiref': 'API Reference', 'ft.l.selfhost': 'Self-hosted Docs',
+                'ft.l.freetrial': 'Free Trial', 'ft.l.techsup': 'Technical Support',
+                'ft.l.construction': 'Construction', 'ft.l.education': 'Education', 'ft.l.aviation': 'Aviation', 'ft.l.printing': 'Printing',
+                'ft.l.manufacturing': 'Manufacturing', 'ft.l.healthcare': 'Healthcare', 'ft.l.finance': 'Finance', 'ft.l.government': 'Government', 'ft.l.commlicense': 'Community License',
+                'ft.l.about': 'About Us', 'ft.l.contact': 'Contact Us', 'ft.l.press': 'Press Kit & Sales Kit', 'ft.l.reseller': 'Become Our Reseller', 'ft.l.partners': 'Partners',
+                'ft.l.blog': 'Blog', 'ft.l.casestudies': 'Case Studies', 'ft.l.faq': 'Technical FAQs',
+                'ty.title': 'Thank you for contacting us!', 'ty.desc': 'We have received your message.<br>We will be in touch in 1 business day.',
+                'ty.home': 'back to homepage', 'ty.tutorials': 'learn more tutorials', 'ty.follow': 'Follow Us'
+            },
+            'zh-CN': {
+                'nav.trial': '免费试用', 'nav.contact': '联系销售',
+                'hero.badge': 'ComPDF vs iText — 更明智的选择',
+                'hero.t1': '同等能力。', 'hero.t2': '更高性价比。', 'hero.t3': '更快集成。',
+                'hero.desc': 'ComPDF 提供企业级 PDF 生成能力,具备 iText 所有核心功能 —— 并增加原生 API 表格创建、透明定价、24/5 专属技术支持,助您加速文档工作流,告别额外开销。',
+                'hero.cta1': '开始免费试用', 'hero.cta2': '预约技术咨询',
+                'hero.output': '✓ invoice.pdf —— 已成功生成',
+                'hero.cap1': '生成与渲染', 'hero.cap2': '查看与批注',
+                'hero.cap3': '转换与提取', 'hero.cap4': 'AI 文档解析',
+                'vp1.t': '高性能 PDF 生成',
+                'vp1.d': '新一代引擎,为 HTML 转 PDF 与 API 表格生成带来业界领先的处理速度与排版精度。',
+                'vp2.t': '透明且具竞争力的定价',
+                'vp2.d': '按平台/按功能授权,无隐藏用量上限,显著降低整体拥有成本 (TCO)。',
+                'vp3.t': '清晰的商业授权',
+                'vp3.d': '100% 自主研发,清晰的商业许可。零 AGPL 传染风险,零补缴费用惊喜。',
+                'vp4.t': '内置 UI 的全链路 SDK',
+                'vp4.d': '工业级 UI 库开箱即用,支持生成 → 展示 → 批注 → 编辑完整流程,无需额外前端开发。',
+                'cmp.title': 'ComPDF vs iText:逐项对比',
+                'cmp.sub': '除了功能对齐,团队还会评估授权风险、总成本、集成速度与支持品质。',
+                'cmp.h1': '评估维度',
+                'cmp.r1c': '文档生成',
+                'cmp.r1a': '新一代高精度引擎,支持动态 PDF 生成、复杂逻辑处理与原生 API 表格创建。',
+                'cmp.r1b': '传统架构,稳定但对复杂版式与现代 AI 集成灵活度不足。',
+                'cmp.r2c': '授权与成本',
+                'cmp.r2a': '按平台透明定价,无隐藏用量限制。TCO 极具竞争力。',
+                'cmp.r2b': '按服务器/按文档/按用户计费,叠加 AGPL 开源传染风险,合规成本高。',
+                'cmp.r3c': '跨平台 UI',
+                'cmp.r3a': '内置工业级 UI 库,完整覆盖生成–展示–批注–编辑工作流。',
+                'cmp.r3b': '仅提供引擎,无前端层,团队需额外数月进行 UI 开发。',
+                'cmp.r4c': '开发效率',
+                'cmp.r4a': '现代化 API 设计、完善文档、响应迅速的 24/5 技术支持。',
+                'cmp.r4b': 'API 老旧学习曲线陡峭,高级支持需额外付费。',
+                'cmp.r5c': '合规风险',
+                'cmp.r5a': '清晰商业授权、完全自主产权,零开源合规陷阱。',
+                'cmp.r5b': 'AGPL/商业双轨授权,易引发法律风险、繁琐审计与补缴费用。',
+                'cmp.btn': '获取详细对比报告',
+                'wf.title': '核心 PDF 生成能力',
+                'wf.sub': '从发票、合同到合规表单、分析报告 —— ComPDF 以速度与精度驱动企业级文档管线。',
+                'wf1.t': 'HTML 模板 → PDF',
+                'wf1.d': '将带动态数据绑定的 HTML/CSS 模板转为像素级精准的 PDF,完整支持 flexbox、grid 及自定义字体。',
+                'wf2.t': '动态 PDF 表单',
+                'wf2.d': '为人力、财务与合规场景自动创建并填写表单,支持交互字段、勾选框、下拉菜单与数字签名。',
+                'wf3.t': '原生 API 表格生成',
+                'wf3.d': '直接通过 API 生成复杂 PDF 表格,无需浏览器渲染。适用于服务端、高并发与无头环境。',
+                'bm.title': '性能基准:ComPDF vs iText',
+                'bm.sub': '独立基准测试显示,ComPDF 在关键 PDF 生成场景中全面领先 iText 9.4.0。',
+                'bm.env': '测试环境',
+                'bm.envCompdf': '<strong>ComPDF:</strong> Java PDF 生成库 V1.0.0',
+                'bm.envItext': '<strong>iText:</strong> V9.4.0',
+                'bm.h1': '测试场景',
+                'bm.s1': '整体性能', 'bm.s2': '复杂文本渲染',
+                'bm.s3': '高分辨率图像嵌入', 'bm.s4': '边框 CSS 样式渲染',
+                'bm.s5': '复杂表格结构与样式', 'bm.s6': '颜色与混合 CSS 渲染',
+                'bm.s7': '嵌套块级元素', 'bm.s8': '多级列表与自定义项目符号',
+                'bm.st': '单线程', 'bm.mt': '多线程 (8)',
+                'bm.muchLonger': '耗时显著更长', 'bm.longer': '耗时更长', 'bm.faster': '更快',
+                'bm.expand': '查看全部测试结果 ▼', 'bm.collapse': '收起 ▲',
+                'why.title': '为什么选择 ComPDF',
+                'why.1t': '企业级性能',
+                'why.1d': '在 9 项基准测试中,8 项全面领先 iText,单线程与多线程负载均优于对手。',
+                'why.2t': '透明、可预期的定价',
+                'why.2d': '无按文档计费、无突击审计。按平台或按功能授权,预算可控。',
+                'why.3t': '零开源合规风险',
+                'why.3d': '100% 自主产权,清晰商业许可,无 AGPL 传染风险,无繁琐法务审计。',
+                'why.4t': '24/5 专属技术支持',
+                'why.4d': '一对一支持、完善文档、定期更新,并提供端到端迁移指导。',
+                'why.5t': '灵活部署',
+                'why.5d': '云 API、本地部署或混合部署自由选择,支持 Java、C#、C++、Web 与移动端。',
+                'form.title': '开启您的 ComPDF 之旅',
+                'form.sub': '告诉我们您的项目需求,我们将为您定制评估方案。',
+                'form.name': '姓名 *', 'form.email': '企业邮箱 *', 'form.phone': '电话',
+                'form.pdflib': '当前使用的 PDF 库', 'form.ph.pdflib': '如:iText 7 / iText 9.x',
+                'form.project': '项目描述',
+                'form.ph.project': '文档类型、用量、部署需求、时间线……',
+                'form.submit': '提交',
+                'form.privacy': '提交即表示您同意 <a href="https://www.compdf.com/privacy-policy" target="_blank" class="underline">隐私政策</a>,我们将严格保密您的数据。',
+                'form.alert': '感谢您的提交!ComPDF 专家将尽快与您联系。',
+                'val.required': '此项为必填。', 'val.email': '请输入有效的邮箱地址。',
+                'val.tooShort': '请至少输入 {minLength} 个字符。',
+                'val.pattern': '请按要求的格式填写。',
+                'ft.c1': '热门产品', 'ft.c2': '开发者', 'ft.c3': '解决方案', 'ft.c4': '公司 & 资源',
+                'ft.sub.docs': '文档', 'ft.sub.comm': '社区',
+                'ft.sub.industry': '行业解决方案', 'ft.sub.web': 'Web应用集成', 'ft.sub.lowcode': '低代码解决方案',
+                'ft.sub.company': '公司', 'ft.sub.resources': '资源中心',
+                'ft.copyright': '© 2014-2026 PDF Technologies, Inc., a KDAN Company. 版权所有。',
+                'ft.legal.privacy': '隐私政策', 'ft.legal.terms': '服务条款', 'ft.legal.security': '安全政策', 'ft.legal.cookie': 'Cookie 设置',
+                'ft.l.conversion': '转换 SDK', 'ft.l.pdfgen': 'PDF生成', 'ft.l.server': '服务器 SDK',
+                'ft.l.aiparse': 'AI 文档解析','ft.l.aiextract': 'AI 文档提取', 'ft.l.kb': '企业知识库', 'ft.l.loginapi': '登录 API',
+                'ft.l.webguide': 'Web 指南', 'ft.l.javaguide': 'Java 指南', 'ft.l.netguide': '.NET 指南', 'ft.l.androidguide': 'Android 指南',
+                'ft.l.iosguide': 'iOS 指南', 'ft.l.flutterguide': 'Flutter 指南', 'ft.l.apiref': 'API 参考', 'ft.l.selfhost': '自托管文档',
+                'ft.l.freetrial': '免费试用', 'ft.l.techsup': '技术支持',
+                'ft.l.construction': '建筑', 'ft.l.education': '教育', 'ft.l.aviation': '航空', 'ft.l.printing': '印刷',
+                'ft.l.manufacturing': '制造业', 'ft.l.healthcare': '医疗健康', 'ft.l.finance': '金融', 'ft.l.government': '政府', 'ft.l.commlicense': '社区许可证',
+                'ft.l.about': '关于我们', 'ft.l.contact': '联系我们', 'ft.l.press': '媒体资料包', 'ft.l.reseller': '成为经销商', 'ft.l.partners': '成为合作伙伴',
+                'ft.l.blog': '博客文章', 'ft.l.casestudies': '客户案例', 'ft.l.faq': '常见问题',
+                'ty.title': '感谢您联系我们！', 'ty.desc': '我们已收到您的消息。<br>我们将在 1 个工作日内与您联系。',
+                'ty.home': '返回首页', 'ty.tutorials': '了解更多教程', 'ty.follow': '关注我们'
+            },
+            'zh-TW': {
+                'nav.trial': '免費試用', 'nav.contact': '聯絡銷售',
+                'hero.badge': 'ComPDF vs iText — 更明智的選擇',
+                'hero.t1': '同等能力。', 'hero.t2': '更高性價比。', 'hero.t3': '更快整合。',
+                'hero.desc': 'ComPDF 提供企業級 PDF 生成能力,具備 iText 所有核心功能 —— 並新增原生 API 表格建立、透明定價、24/5 專屬技術支援,助您加速文件工作流,告別額外開銷。',
+                'hero.cta1': '開始免費試用', 'hero.cta2': '預約技術諮詢',
+                'hero.output': '✓ invoice.pdf —— 已成功生成',
+                'hero.cap1': '生成與渲染', 'hero.cap2': '檢視與註解',
+                'hero.cap3': '轉換與擷取', 'hero.cap4': 'AI 文件解析',
+                'vp1.t': '高效能 PDF 生成',
+                'vp1.d': '新一代引擎,為 HTML 轉 PDF 與 API 表格生成帶來業界領先的處理速度與排版精度。',
+                'vp2.t': '透明且具競爭力的定價',
+                'vp2.d': '按平台/按功能授權,無隱藏用量上限,顯著降低整體擁有成本 (TCO)。',
+                'vp3.t': '清晰的商業授權',
+                'vp3.d': '100% 自主研發,清晰商業許可。零 AGPL 傳染風險,零補繳費用驚喜。',
+                'vp4.t': '內建 UI 的全鏈路 SDK',
+                'vp4.d': '工業級 UI 庫開箱即用,支援生成 → 展示 → 註解 → 編輯完整流程,無需額外前端開發。',
+                'cmp.title': 'ComPDF vs iText:逐項比較',
+                'cmp.sub': '除了功能對齊,團隊還會評估授權風險、總成本、整合速度與支援品質。',
+                'cmp.h1': '評估維度',
+                'cmp.r1c': '文件生成',
+                'cmp.r1a': '新一代高精度引擎,支援動態 PDF 生成、複雜邏輯處理與原生 API 表格建立。',
+                'cmp.r1b': '傳統架構,穩定但對複雜版式與現代 AI 整合靈活度不足。',
+                'cmp.r2c': '授權與成本',
+                'cmp.r2a': '按平台透明定價,無隱藏用量限制。TCO 極具競爭力。',
+                'cmp.r2b': '按伺服器/按文件/按使用者計費,疊加 AGPL 開源傳染風險,合規成本高。',
+                'cmp.r3c': '跨平台 UI',
+                'cmp.r3a': '內建工業級 UI 庫,完整涵蓋生成–展示–註解–編輯工作流。',
+                'cmp.r3b': '僅提供引擎,無前端層,團隊需額外數月進行 UI 開發。',
+                'cmp.r4c': '開發效率',
+                'cmp.r4a': '現代化 API 設計、完善文件、回應迅速的 24/5 技術支援。',
+                'cmp.r4b': 'API 老舊學習曲線陡峭,進階支援需額外付費。',
+                'cmp.r5c': '合規風險',
+                'cmp.r5a': '清晰商業授權、完全自主產權,零開源合規陷阱。',
+                'cmp.r5b': 'AGPL/商業雙軌授權,易引發法律風險、繁瑣稽核與補繳費用。',
+                'cmp.btn': '取得詳細比較報告',
+                'wf.title': '核心 PDF 生成能力',
+                'wf.sub': '從發票、合約到合規表單、分析報告 —— ComPDF 以速度與精度驅動企業級文件管線。',
+                'wf1.t': 'HTML 範本 → PDF',
+                'wf1.d': '將帶動態資料繫結的 HTML/CSS 範本轉為像素級精準 PDF,完整支援 flexbox、grid 及自訂字型。',
+                'wf2.t': '動態 PDF 表單',
+                'wf2.d': '為人資、財務與合規場景自動建立並填寫表單,支援互動欄位、核取方塊、下拉選單與數位簽章。',
+                'wf3.t': '原生 API 表格生成',
+                'wf3.d': '直接透過 API 生成複雜 PDF 表格,無需瀏覽器渲染。適用於伺服端、高流量與 headless 環境。',
+                'bm.title': '效能基準:ComPDF vs iText',
+                'bm.sub': '獨立基準測試顯示,ComPDF 於關鍵 PDF 生成場景中全面領先 iText 9.4.0。',
+                'bm.env': '測試環境',
+                'bm.envCompdf': '<strong>ComPDF:</strong> Java PDF 生成庫 V1.0.0',
+                'bm.envItext': '<strong>iText:</strong> V9.4.0',
+                'bm.h1': '測試場景',
+                'bm.s1': '整體效能', 'bm.s2': '複雜文字渲染',
+                'bm.s3': '高解析度影像嵌入', 'bm.s4': '框線 CSS 樣式渲染',
+                'bm.s5': '複雜表格結構與樣式', 'bm.s6': '色彩與混合 CSS 渲染',
+                'bm.s7': '巢狀區塊元素', 'bm.s8': '多層清單與自訂項目符號',
+                'bm.st': '單執行緒', 'bm.mt': '多執行緒 (8)',
+                'bm.muchLonger': '耗時顯著更長', 'bm.longer': '耗時更長', 'bm.faster': '更快',
+                'bm.expand': '檢視全部測試結果 ▼', 'bm.collapse': '收起 ▲',
+                'why.title': '為什麼選擇 ComPDF',
+                'why.1t': '企業級效能',
+                'why.1d': '9 項基準測試中 8 項全面領先 iText,單執行緒與多執行緒負載均優於對手。',
+                'why.2t': '透明、可預期的定價',
+                'why.2d': '無按文件計費、無突擊稽核。按平台或按功能授權,預算可掌握。',
+                'why.3t': '零開源合規風險',
+                'why.3d': '100% 自主產權,清晰商業許可,無 AGPL 傳染風險,無繁瑣法務稽核。',
+                'why.4t': '24/5 專屬技術支援',
+                'why.4d': '一對一支援、完善文件、定期更新,並提供端對端遷移指導。',
+                'why.5t': '彈性部署',
+                'why.5d': '雲端 API、地端部署或混合部署自由選擇,支援 Java、C#、C++、Web 與行動端。',
+                'form.title': '開啟您的 ComPDF 之旅',
+                'form.sub': '告訴我們您的專案需求,我們將為您量身打造評估方案。',
+                'form.name': '姓名 *', 'form.email': '企業信箱 *', 'form.phone': '電話',
+                'form.pdflib': '目前使用的 PDF 庫', 'form.ph.pdflib': '如:iText 7 / iText 9.x',
+                'form.project': '專案描述',
+                'form.ph.project': '文件類型、用量、部署需求、時程……',
+                'form.submit': '提交',
+                'form.privacy': '提交即表示您同意 <a href="https://www.compdf.com/privacy-policy" target="_blank" class="underline">隱私政策</a>,我們將嚴格保密您的資料。',
+                'form.alert': '感謝您的提交!ComPDF 專員將盡快與您聯絡。',
+                'val.required': '此欄位為必填。', 'val.email': '請輸入有效的電子郵件地址。',
+                'val.tooShort': '請至少輸入 {minLength} 個字元。',
+                'val.pattern': '請依要求的格式填寫。',
+                'ft.c1': '熱門產品', 'ft.c2': '開發者', 'ft.c3': '解決方案', 'ft.c4': '公司 & 資源',
+                'ft.sub.docs': '文件', 'ft.sub.comm': '社群',
+                'ft.sub.industry': '行業解決方案', 'ft.sub.web': 'Web應用整合', 'ft.sub.lowcode': '低程式碼解決方案',
+                'ft.sub.company': '公司', 'ft.sub.resources': '資源中心',
+                'ft.copyright': '© 2014-2026 PDF Technologies, Inc., a KDAN Company. 版權所有。',
+                'ft.legal.privacy': '隱私政策', 'ft.legal.terms': '服務條款', 'ft.legal.security': '安全政策', 'ft.legal.cookie': 'Cookie 設定',
+                'ft.l.conversion': '轉換 SDK', 'ft.l.pdfgen': 'PDF 生成', 'ft.l.server': '伺服器 SDK',
+                'ft.l.aiparse': 'AI 文件解析','ft.l.aiextract': 'AI 文件提取', 'ft.l.kb': '企業知識庫', 'ft.l.loginapi': '登入 API',
+                'ft.l.webguide': 'Web 指南', 'ft.l.javaguide': 'Java 指南', 'ft.l.netguide': '.NET 指南', 'ft.l.androidguide': 'Android 指南',
+                'ft.l.iosguide': 'iOS 指南', 'ft.l.flutterguide': 'Flutter 指南', 'ft.l.apiref': 'API 參考', 'ft.l.selfhost': '自託管文件',
+                'ft.l.freetrial': '免費試用', 'ft.l.techsup': '技術支援',
+                'ft.l.construction': '建築', 'ft.l.education': '教育', 'ft.l.aviation': '航空', 'ft.l.printing': '印刷',
+                'ft.l.manufacturing': '製造業', 'ft.l.healthcare': '醫療健康', 'ft.l.finance': '金融', 'ft.l.government': '政府', 'ft.l.commlicense': '社群授權',
+                'ft.l.about': '關於我們', 'ft.l.contact': '聯絡我們', 'ft.l.press': '媒體資料包', 'ft.l.reseller': '成為經銷商', 'ft.l.partners': '成為合作夥伴',
+                'ft.l.blog': '部落格文章', 'ft.l.casestudies': '客戶案例', 'ft.l.faq': '常見問題',
+                'ty.title': '感謝您聯繫我們！', 'ty.desc': '我們已收到您的訊息。<br>我們將在 1 個工作日內與您聯繫。',
+                'ty.home': '返回首頁', 'ty.tutorials': '了解更多教學', 'ty.follow': '追蹤我們'
+            },
+            es: {
+                'nav.trial': 'Prueba gratuita', 'nav.contact': 'Contactar ventas',
+                'hero.badge': 'ComPDF vs iText — Una elección más inteligente',
+                'hero.t1': 'Las mismas capacidades.', 'hero.t2': 'Mejor valor.', 'hero.t3': 'Integración más rápida.',
+                'hero.desc': 'ComPDF ofrece generación de PDF de nivel empresarial con todas las funciones que esperas de iText, además de creación nativa de tablas por API, precios transparentes y soporte dedicado 24/5. Acelera tus flujos documentales sin sobrecostes.',
+                'hero.cta1': 'Comenzar prueba gratuita', 'hero.cta2': 'Solicitar consulta técnica',
+                'hero.output': '✓ invoice.pdf — generado correctamente',
+                'hero.cap1': 'Generar y renderizar', 'hero.cap2': 'Ver y anotar',
+                'hero.cap3': 'Convertir y extraer', 'hero.cap4': 'Análisis IA de documentos',
+                'vp1.t': 'Generación de PDF de alto rendimiento',
+                'vp1.d': 'Motor de nueva generación con velocidad de procesamiento y fidelidad de diseño líderes del sector para HTML a PDF y generación de tablas vía API.',
+                'vp2.t': 'Precios transparentes y competitivos',
+                'vp2.d': 'Licencias por plataforma/por función sin límites ocultos de volumen, reduciendo significativamente el coste total de propiedad (TCO).',
+                'vp3.t': 'Licencia comercial limpia',
+                'vp3.d': 'Propiedad intelectual 100% propia con licencia comercial clara. Cero riesgos virales AGPL, cero sorpresas por ajustes de tarifas.',
+                'vp4.t': 'SDK de ciclo completo con UI integrada',
+                'vp4.d': 'Biblioteca UI de grado industrial lista para usar: flujos generar → mostrar → anotar → editar sin desarrollo frontend adicional.',
+                'cmp.title': 'ComPDF vs iText: comparación lado a lado',
+                'cmp.sub': 'Más allá de la paridad de funciones, los equipos evalúan riesgo de licencia, coste total, velocidad de integración y calidad del soporte.',
+                'cmp.h1': 'Criterio',
+                'cmp.r1c': 'Generación de documentos',
+                'cmp.r1a': 'Motor de nueva generación de alta precisión con generación dinámica de PDF, soporte de lógica compleja y creación nativa de tablas por API.',
+                'cmp.r1b': 'Arquitectura tradicional; robusta pero menos flexible para diseños complejos e integración con IA moderna.',
+                'cmp.r2c': 'Licencia y coste',
+                'cmp.r2a': 'Precios transparentes por plataforma sin límites ocultos de volumen. TCO altamente competitivo.',
+                'cmp.r2b': 'Facturación por servidor/documento/usuario con riesgo viral AGPL. Altos costes de cumplimiento.',
+                'cmp.r3c': 'UI multiplataforma',
+                'cmp.r3a': 'Biblioteca UI industrial integrada para un flujo completo generar–mostrar–anotar–editar.',
+                'cmp.r3b': 'Solo motor, sin capa frontend. Los equipos enfrentan meses de desarrollo UI adicional.',
+                'cmp.r4c': 'Eficiencia de desarrollo',
+                'cmp.r4a': 'API moderna, documentación completa y soporte técnico 24/5 de alta respuesta.',
+                'cmp.r4b': 'Curva de aprendizaje pronunciada con APIs heredadas. El soporte premium requiere tarifas adicionales costosas.',
+                'cmp.r5c': 'Riesgo de cumplimiento',
+                'cmp.r5a': 'Licencia comercial limpia con IP totalmente independiente. Cero trampas de cumplimiento open-source.',
+                'cmp.r5b': 'Licencia dual AGPL/Comercial con riesgos legales, auditorías complejas y ajustes de tarifa sorpresa.',
+                'cmp.btn': 'Obtener informe de comparación detallado',
+                'wf.title': 'Capacidades esenciales de generación PDF',
+                'wf.sub': 'Desde facturas y contratos hasta formularios regulatorios e informes analíticos — ComPDF potencia los pipelines documentales empresariales con velocidad y precisión.',
+                'wf1.t': 'Plantilla HTML → PDF',
+                'wf1.d': 'Transforma plantillas HTML/CSS con datos dinámicos en PDFs píxel-perfectos a escala. Soporte completo de CSS incluyendo flexbox, grid y fuentes personalizadas.',
+                'wf2.t': 'Formularios PDF dinámicos',
+                'wf2.d': 'Automatiza creación y rellenado de formularios para RR.HH., finanzas y cumplimiento. Compatible con campos interactivos, casillas, listas y firmas digitales.',
+                'wf3.t': 'Generación nativa de tablas por API',
+                'wf3.d': 'Crea tablas PDF complejas directamente vía API, sin renderizado de navegador. Ideal para entornos servidor, alto volumen y headless.',
+                'bm.title': 'Benchmark de rendimiento: ComPDF vs iText',
+                'bm.sub': 'Resultados de benchmark independientes muestran que ComPDF supera a iText 9.4.0 en los escenarios clave de generación PDF.',
+                'bm.env': 'Entorno de prueba',
+                'bm.envCompdf': '<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0',
+                'bm.envItext': '<strong>iText:</strong> V9.4.0',
+                'bm.h1': 'Escenario de prueba',
+                'bm.s1': 'Rendimiento global', 'bm.s2': 'Renderizado de texto complejo',
+                'bm.s3': 'Incrustación de imágenes de alta resolución', 'bm.s4': 'Renderizado de estilos de borde CSS',
+                'bm.s5': 'Estructura y estilo de tabla complejas', 'bm.s6': 'Renderizado de color y CSS mezclado',
+                'bm.s7': 'Elementos de bloque anidados', 'bm.s8': 'Listas multinivel y viñetas personalizadas',
+                'bm.st': 'Un solo hilo', 'bm.mt': 'Multihilo (8)',
+                'bm.muchLonger': 'Tarda mucho más', 'bm.longer': 'Tarda más', 'bm.faster': 'Más rápido',
+                'bm.expand': 'Ver todos los resultados ▼', 'bm.collapse': 'Contraer ▲',
+                'why.title': 'Por qué elegir ComPDF',
+                'why.1t': 'Rendimiento de nivel empresarial',
+                'why.1d': 'Supera a iText en 8 de 9 categorías de benchmark, tanto en cargas mono como multihilo.',
+                'why.2t': 'Precios transparentes y predecibles',
+                'why.2d': 'Sin tarifas por documento ni auditorías sorpresa. Presupuesta con confianza con licencias por plataforma o función.',
+                'why.3t': 'Cero riesgo de cumplimiento open-source',
+                'why.3d': 'IP 100% propia con licencia comercial limpia. Sin riesgos virales AGPL ni auditorías legales complejas.',
+                'why.4t': 'Soporte técnico dedicado 24/5',
+                'why.4d': 'Atención personalizada, documentación completa, actualizaciones regulares y guía de migración integral.',
+                'why.5t': 'Opciones de despliegue flexibles',
+                'why.5d': 'API cloud, auto-hospedado o híbrido — despliega como prefieras, con soporte para Java, C#, C++, Web y móvil.',
+                'form.title': 'Empieza con ComPDF',
+                'form.sub': 'Cuéntanos sobre tu proyecto y te prepararemos un plan de evaluación personalizado.',
+                'form.name': 'Nombre completo *', 'form.email': 'Correo corporativo *', 'form.phone': 'Teléfono',
+                'form.pdflib': 'Biblioteca PDF actual', 'form.ph.pdflib': 'p. ej., iText 7 / iText 9.x',
+                'form.project': 'Descripción del proyecto',
+                'form.ph.project': 'Tipos de documentos, volumen, necesidades de despliegue, plazos...',
+                'form.submit': 'Enviar',
+                'form.privacy': 'Al enviar, aceptas la <a href="https://www.compdf.com/privacy-policy" target="_blank" class="underline">Política de privacidad</a>. Tus datos se tratarán con confidencialidad.',
+                'form.alert': '¡Gracias! Un especialista de ComPDF te contactará en breve.',
+                'val.required': 'Este campo es obligatorio.', 'val.email': 'Introduce una dirección de correo válida.',
+                'val.tooShort': 'Introduce al menos {minLength} caracteres.',
+                'val.pattern': 'El formato no coincide con el requerido.',
+                'ft.c1': 'Productos populares', 'ft.c2': 'Desarrolladores', 'ft.c3': 'Soluciones', 'ft.c4': 'Empresa y recursos',
+                'ft.sub.docs': 'Documentación', 'ft.sub.comm': 'Comunidad',
+                'ft.sub.industry': 'Soluciones por sector', 'ft.sub.web': 'Integraciones web', 'ft.sub.lowcode': 'Low-Code',
+                'ft.sub.company': 'Empresa', 'ft.sub.resources': 'Recursos',
+                'ft.copyright': '© 2014-2026 PDF Technologies, Inc., una empresa KDAN. Todos los derechos reservados.',
+                'ft.legal.privacy': 'Política de privacidad', 'ft.legal.terms': 'Términos del servicio', 'ft.legal.security': 'Política de seguridad', 'ft.legal.cookie': 'Configuración de cookies',
+                'ft.l.conversion': 'SDK de conversión', 'ft.l.pdfgen': 'Generación de PDF', 'ft.l.server': 'SDK de servidor',
+                'ft.l.aiparse': 'Análisis de documentos con IA','ft.l.aiextract': 'Extracción de documentos con IA', 'ft.l.kb': 'Base de conocimiento empresarial', 'ft.l.loginapi': 'Iniciar sesión en API',
+                'ft.l.webguide': 'Guías Web', 'ft.l.javaguide': 'Guías Java', 'ft.l.netguide': 'Guías .NET', 'ft.l.androidguide': 'Guías Android',
+                'ft.l.iosguide': 'Guías iOS', 'ft.l.flutterguide': 'Guías Flutter', 'ft.l.apiref': 'Referencia de API', 'ft.l.selfhost': 'Documentación autoalojada',
+                'ft.l.freetrial': 'Prueba gratuita', 'ft.l.techsup': 'Soporte técnico',
+                'ft.l.construction': 'Construcción', 'ft.l.education': 'Educación', 'ft.l.aviation': 'Aviación', 'ft.l.printing': 'Impresión',
+                'ft.l.manufacturing': 'Manufactura', 'ft.l.healthcare': 'Salud', 'ft.l.finance': 'Finanzas', 'ft.l.government': 'Gobierno', 'ft.l.commlicense': 'Licencia comunitaria',
+                'ft.l.about': 'Sobre nosotros', 'ft.l.contact': 'Contáctenos', 'ft.l.press': 'Kit de prensa & Kit de ventas', 'ft.l.reseller': 'Conviértase en revendedor', 'ft.l.partners': 'Socios',
+                'ft.l.blog': 'Blog', 'ft.l.casestudies': 'Casos de estudio', 'ft.l.faq': 'Preguntas frecuentes técnicas',
+                'ty.title': '¡Gracias por contactarnos!', 'ty.desc': 'Hemos recibido su mensaje.<br>Nos pondremos en contacto en 1 día hábil.',
+                'ty.home': 'volver a la página principal', 'ty.tutorials': 'ver más tutoriales', 'ty.follow': 'Síguenos'
+            },
+            ja: {
+                'nav.trial': '無料トライアル', 'nav.contact': '営業に問い合わせ',
+                'hero.badge': 'ComPDF vs iText — よりスマートな選択',
+                'hero.t1': '同等の機能。', 'hero.t2': '優れたコスト価値。', 'hero.t3': '迅速な統合。',
+                'hero.desc': 'ComPDF は iText が備える機能をすべて提供するエンタープライズ級 PDF 生成に加え、ネイティブ API テーブル作成、透明な料金体系、24/5 の専属サポートを実現。余計な負担なくドキュメントワークフローを加速します。',
+                'hero.cta1': '無料トライアルを開始', 'hero.cta2': '技術相談を依頼',
+                'hero.output': '✓ invoice.pdf — 正常に生成しました',
+                'hero.cap1': '生成とレンダリング', 'hero.cap2': '表示と注釈',
+                'hero.cap3': '変換と抽出', 'hero.cap4': 'AI ドキュメント解析',
+                'vp1.t': '高性能 PDF 生成',
+                'vp1.d': '次世代エンジンが HTML→PDF や API ベースのテーブル生成で業界最高水準の処理速度とレイアウト精度を提供します。',
+                'vp2.t': '透明で競争力のある価格',
+                'vp2.d': 'プラットフォーム別/機能別ライセンス、隠れたボリューム制限なし。総所有コスト (TCO) を大幅に削減。',
+                'vp3.t': 'クリーンな商用ライセンス',
+                'vp3.d': '100% 自社開発の IP と明快な商用ライセンス。AGPL 感染リスクや突発的な追加費用は一切ありません。',
+                'vp4.t': 'UI 内蔵のフルサイクル SDK',
+                'vp4.d': '工業グレードの UI ライブラリがすぐに利用可能。生成 → 表示 → 注釈 → 編集までフロントエンド開発不要で実現。',
+                'cmp.title': 'ComPDF vs iText:項目別比較',
+                'cmp.sub': '機能の互換性に加え、チームはライセンスリスク・総コスト・統合速度・サポート品質を評価します。',
+                'cmp.h1': '評価項目',
+                'cmp.r1c': 'ドキュメント生成',
+                'cmp.r1a': '次世代の高精度エンジン。動的 PDF 生成、複雑なロジックサポート、ネイティブ API によるテーブル作成に対応。',
+                'cmp.r1b': '従来型アーキテクチャ。堅牢だが、複雑なレイアウトや最新の AI 統合には柔軟性が不足。',
+                'cmp.r2c': 'ライセンスとコスト',
+                'cmp.r2a': 'プラットフォーム別の透明な価格、隠れたボリューム制限なし。TCO で高い競争力。',
+                'cmp.r2b': 'サーバー/ドキュメント/ユーザー別課金に加え、AGPL オープンソース感染リスク。コンプライアンスコストが高い。',
+                'cmp.r3c': 'クロスプラットフォーム UI',
+                'cmp.r3a': '工業グレードの UI ライブラリを内蔵し、生成–表示–注釈–編集まで一貫して対応。',
+                'cmp.r3b': 'エンジンのみでフロントエンド層なし。追加の UI 開発に数ヶ月かかる場合も。',
+                'cmp.r4c': '開発効率',
+                'cmp.r4a': 'モダンな API 設計、充実したドキュメント、応答の速い 24/5 技術サポート。',
+                'cmp.r4b': 'レガシー API で学習コストが高く、プレミアムサポートは高額な追加費用が必要。',
+                'cmp.r5c': 'コンプライアンスリスク',
+                'cmp.r5a': '完全自社 IP と明快な商用ライセンス。オープンソース由来のリスクはゼロ。',
+                'cmp.r5b': 'AGPL と商用のデュアルライセンスで法的リスク・煩雑な監査・突発的な追加費用が発生しやすい。',
+                'cmp.btn': '詳細な比較レポートを取得',
+                'wf.title': 'コア PDF 生成機能',
+                'wf.sub': '請求書や契約書から規制フォーム、分析レポートまで — ComPDF はエンタープライズの文書パイプラインを高速かつ高精度に支えます。',
+                'wf1.t': 'HTML テンプレート → PDF',
+                'wf1.d': '動的データをバインドした HTML/CSS テンプレートをピクセルパーフェクトな PDF に変換。flexbox・grid・カスタムフォントを完全サポート。',
+                'wf2.t': 'ダイナミック PDF フォーム',
+                'wf2.d': '人事・財務・コンプライアンス向けにフォーム作成と入力を自動化。インタラクティブ項目、チェックボックス、ドロップダウン、電子署名に対応。',
+                'wf3.t': 'ネイティブ API によるテーブル生成',
+                'wf3.d': 'ブラウザレンダリング不要で、API から直接複雑な PDF テーブルを生成。サーバーサイド・大量処理・ヘッドレス環境に最適。',
+                'bm.title': 'パフォーマンスベンチマーク:ComPDF vs iText',
+                'bm.sub': '独立したベンチマークで、ComPDF は主要な PDF 生成シナリオにおいて iText 9.4.0 を全面的に上回りました。',
+                'bm.env': 'テスト環境',
+                'bm.envCompdf': '<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0',
+                'bm.envItext': '<strong>iText:</strong> V9.4.0',
+                'bm.h1': 'テストシナリオ',
+                'bm.s1': '総合パフォーマンス', 'bm.s2': '複雑なテキストのレンダリング',
+                'bm.s3': '高解像度画像の埋め込み', 'bm.s4': 'ボーダー CSS スタイルのレンダリング',
+                'bm.s5': '複雑なテーブル構造とスタイル', 'bm.s6': '色とブレンド CSS のレンダリング',
+                'bm.s7': 'ネストされたブロック要素', 'bm.s8': '多階層リストとカスタムマーカー',
+                'bm.st': 'シングルスレッド', 'bm.mt': 'マルチスレッド (8)',
+                'bm.muchLonger': '大幅に時間がかかる', 'bm.longer': '時間がかかる', 'bm.faster': '高速',
+                'bm.expand': 'すべてのテスト結果を表示 ▼', 'bm.collapse': '折りたたむ ▲',
+                'why.title': 'ComPDF が選ばれる理由',
+                'why.1t': 'エンタープライズ級のパフォーマンス',
+                'why.1d': '9 項目のベンチマーク中 8 項目で iText を上回り、シングル・マルチスレッドの両方で優位。',
+                'why.2t': '透明で予測可能な価格',
+                'why.2d': 'ドキュメント単位の課金や突然の監査は一切なし。プラットフォーム別/機能別ライセンスで予算を確実に管理。',
+                'why.3t': 'オープンソースコンプライアンスリスクゼロ',
+                'why.3d': '100% 自社 IP とクリーンな商用ライセンス。AGPL 感染や煩雑な法務監査は不要。',
+                'why.4t': '24/5 専属テクニカルサポート',
+                'why.4d': '1 対 1 のサポート、充実したドキュメント、定期更新、エンドツーエンドの移行ガイドを提供。',
+                'why.5t': '柔軟なデプロイオプション',
+                'why.5d': 'クラウド API、セルフホスト、ハイブリッド — Java/C#/C++/Web/モバイルに対応し、自由に選択可能。',
+                'form.title': 'ComPDF を始めましょう',
+                'form.sub': 'プロジェクトについてお聞かせください。最適な評価プランをご提案します。',
+                'form.name': '氏名 *', 'form.email': '業務用メール *', 'form.phone': '電話番号',
+                'form.pdflib': '現在お使いの PDF ライブラリ', 'form.ph.pdflib': '例:iText 7 / iText 9.x',
+                'form.project': 'プロジェクト概要',
+                'form.ph.project': 'ドキュメント種別、ボリューム、デプロイ要件、スケジュールなど...',
+                'form.submit': '送信',
+                'form.privacy': '送信することで <a href="https://www.compdf.com/privacy-policy" target="_blank" class="underline">プライバシーポリシー</a> に同意したものとみなします。情報は厳重に管理されます。',
+                'form.alert': 'ご送信ありがとうございます!ComPDF の担当者がまもなくご連絡いたします。',
+                'val.required': 'この項目は必須です。', 'val.email': '有効なメールアドレスを入力してください。',
+                'val.tooShort': '{minLength} 文字以上で入力してください。',
+                'val.pattern': '指定された形式で入力してください。',
+                'ft.c1': '人気商品', 'ft.c2': '開発者', 'ft.c3': 'ソリューション', 'ft.c4': '会社 & リソース',
+                'ft.sub.docs': 'ドキュメント', 'ft.sub.comm': 'コミュニティ',
+                'ft.sub.industry': '業界ソリューション', 'ft.sub.web': 'Webアプリ統合', 'ft.sub.lowcode': 'ローコード',
+                'ft.sub.company': '会社について', 'ft.sub.resources': 'リソースセンター',
+                'ft.copyright': '© 2014-2026 PDF Technologies, Inc.(KDAN グループ)All Rights Reserved.',
+                'ft.legal.privacy': '個人情報方針', 'ft.legal.terms': '利用規約', 'ft.legal.security': '安全保護方針', 'ft.legal.cookie': 'Cookie 設定',
+                'ft.l.conversion': 'コンバージョン SDK', 'ft.l.pdfgen': 'PDF 生成', 'ft.l.server': 'サーバー SDK',
+                'ft.l.aiparse': 'AI ドキュメント解析','ft.l.aiextract': 'AI ドキュメント抽出', 'ft.l.kb': 'エンタープライズナレッジベース', 'ft.l.loginapi': 'ログインAPI',
+                'ft.l.webguide': 'Web ガイド', 'ft.l.javaguide': 'Java ガイド', 'ft.l.netguide': '.NET ガイド', 'ft.l.androidguide': 'Android ガイド',
+                'ft.l.iosguide': 'iOS ガイド', 'ft.l.flutterguide': 'Flutter ガイド', 'ft.l.apiref': 'API リファレンス', 'ft.l.selfhost': 'セルフホスト ドキュメント',
+                'ft.l.freetrial': '無料トライアル', 'ft.l.techsup': 'テクニカルサポート',
+                'ft.l.construction': '建設', 'ft.l.education': '教育', 'ft.l.aviation': '航空', 'ft.l.printing': '印刷',
+                'ft.l.manufacturing': '製造', 'ft.l.healthcare': '医療', 'ft.l.finance': '金融', 'ft.l.government': '政府機関', 'ft.l.commlicense': '中小企業支援',
+                'ft.l.about': '会社概要', 'ft.l.contact': 'セールスに連絡', 'ft.l.press': 'ニュース＆メディアキット', 'ft.l.reseller': '代理店になる', 'ft.l.partners': 'パートナーになる',
+                'ft.l.blog': 'ブログ記事', 'ft.l.casestudies': '導入事例', 'ft.l.faq': 'よくある質問',
+                'ty.title': 'お問い合わせいただきありがとうございます！', 'ty.desc': 'メッセージを受け付けました。<br>1 営業日以内にご連絡いたします。',
+                'ty.home': 'ホームページに戻る', 'ty.tutorials': 'チュートリアルをもっと見る', 'ty.follow': 'フォローする'
+            },
+            "de": {
+                "nav.trial": "Kostenlos testen",
+                "nav.contact": "Vertrieb kontaktieren",
+                "hero.badge": "ComPDF vs. iText — Die klügere Wahl",
+                "hero.t1": "Gleiche Funktionen.",
+                "hero.t2": "Besserer Wert.",
+                "hero.t3": "Schnellere Integration.",
+                "hero.desc": "ComPDF liefert Enterprise-PDF-Generierung mit allen von iText erwarteten Funktionen — plus nativer API-Tabellenerstellung, transparenter Preisgestaltung und engagiertem 24/5-Support. Beschleunigen Sie Ihre Dokument-Workflows ohne Mehraufwand.",
+                "hero.cta1": "Kostenlos testen",
+                "hero.cta2": "Technische Beratung anfordern",
+                "hero.output": "✓ invoice.pdf — erfolgreich erstellt",
+                "hero.cap1": "Erstellen & Rendern",
+                "hero.cap2": "Ansehen & Kommentieren",
+                "hero.cap3": "Konvertieren & Extrahieren",
+                "hero.cap4": "KI-Dokumentanalyse",
+                "vp1.t": "Hochleistungs-PDF-Generierung",
+                "vp1.d": "Next-Gen-Engine mit branchenführender Geschwindigkeit und Layout-Treue für HTML-zu-PDF- und API-basierte Tabellenerzeugung.",
+                "vp2.t": "Transparente, wettbewerbsfähige Preise",
+                "vp2.d": "Lizenzierung pro Plattform / Funktion ohne versteckte Volumenlimits — deutlich niedrigere Total Cost of Ownership.",
+                "vp3.t": "Klare kommerzielle Lizenz",
+                "vp3.d": "100 % eigenständig entwickeltes IP mit klarer kommerzieller Lizenz. Kein AGPL-Risiko, keine Nachzahlungen.",
+                "vp4.t": "Voll ausgestattetes SDK mit UI",
+                "vp4.d": "Industrielle UI-Bibliothek für Erstellen → Anzeigen → Kommentieren → Bearbeiten — ohne zusätzlichen Frontend-Aufwand.",
+                "cmp.title": "ComPDF vs. iText: Direktvergleich",
+                "cmp.sub": "Über Funktionsparität hinaus bewerten Teams Lizenzrisiko, Gesamtkosten, Integrationsgeschwindigkeit und Supportqualität.",
+                "cmp.h1": "Kriterium",
+                "cmp.r1c": "Dokumentenerstellung",
+                "cmp.r1a": "Hochpräzise Next-Gen-Engine mit dynamischer PDF-Generierung, komplexer Logik und nativer API-Tabellenerstellung.",
+                "cmp.r1b": "Traditionelle Architektur — robust, aber weniger flexibel bei komplexen Layouts und moderner KI-Integration.",
+                "cmp.r2c": "Lizenz & Kosten",
+                "cmp.r2a": "Transparente Preise pro Plattform ohne versteckte Volumenlimits. Hoch wettbewerbsfähige TCO.",
+                "cmp.r2b": "Abrechnung pro Server / Dokument / Nutzer mit AGPL-Risiken. Hohe Compliance-Kosten.",
+                "cmp.r3c": "Plattformübergreifende UI",
+                "cmp.r3a": "Integrierte Industrie-UI-Bibliothek für vollständigen Erstellen–Anzeigen–Kommentieren–Bearbeiten-Workflow.",
+                "cmp.r3b": "Nur Engine — keine Frontend-Schicht. Zusätzliche Monate UI-Entwicklung erforderlich.",
+                "cmp.r4c": "Entwicklereffizienz",
+                "cmp.r4a": "Moderne API, umfassende Dokumentation und reaktionsschneller 24/5-Support.",
+                "cmp.r4b": "Steile Lernkurve mit Legacy-APIs. Premium-Support kostet extra.",
+                "cmp.r5c": "Compliance-Risiko",
+                "cmp.r5a": "Klare kommerzielle Lizenz mit vollständig eigenem IP. Keine Open-Source-Fallstricke.",
+                "cmp.r5b": "Duales AGPL/Kommerz-Modell mit rechtlichen Risiken, aufwendigen Audits und Nachzahlungen.",
+                "cmp.btn": "Detaillierten Vergleichsbericht erhalten",
+                "wf.title": "Kern-PDF-Generierungsfunktionen",
+                "wf.sub": "Von Rechnungen und Verträgen bis zu Compliance-Formularen und Reports — ComPDF treibt Enterprise-Dokumenten-Pipelines mit Geschwindigkeit und Präzision.",
+                "wf1.t": "HTML-Vorlage → PDF",
+                "wf1.d": "HTML/CSS-Vorlagen mit dynamischer Datenbindung in pixelgenaue PDFs umwandeln — voller CSS-Support inkl. Flexbox, Grid und Custom Fonts.",
+                "wf2.t": "Dynamische PDF-Formulare",
+                "wf2.d": "Automatisierte Formularerstellung und -befüllung für HR, Finanzen und Compliance. Interaktive Felder, Checkboxen, Dropdowns, digitale Signaturen.",
+                "wf3.t": "Native API-Tabellenerstellung",
+                "wf3.d": "Komplexe PDF-Tabellen direkt per API erzeugen — ohne Browser-Rendering. Ideal für Server-, High-Volume- und Headless-Umgebungen.",
+                "bm.title": "Performance-Benchmark: ComPDF vs. iText",
+                "bm.sub": "Unabhängige Benchmarks zeigen: ComPDF übertrifft iText 9.4.0 in allen zentralen PDF-Generierungsszenarien.",
+                "bm.env": "Testumgebung",
+                "bm.envCompdf": "<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0",
+                "bm.envItext": "<strong>iText:</strong> V9.4.0",
+                "bm.h1": "Testszenario",
+                "bm.s1": "Gesamtleistung",
+                "bm.s2": "Komplexes Text-Rendering",
+                "bm.s3": "Hochauflösende Bildeinbettung",
+                "bm.s4": "Rahmen-CSS-Rendering",
+                "bm.s5": "Komplexe Tabellenstruktur & Stile",
+                "bm.s6": "Farb- & Misch-CSS-Rendering",
+                "bm.s7": "Verschachtelte Blockelemente",
+                "bm.s8": "Mehrstufige Listen & Aufzählungen",
+                "bm.st": "Single-Thread",
+                "bm.mt": "Multi-Thread (8)",
+                "bm.muchLonger": "Deutlich langsamer",
+                "bm.longer": "Langsamer",
+                "bm.faster": "Schneller",
+                "bm.expand": "Alle Testergebnisse anzeigen ▼",
+                "bm.collapse": "Zuklappen ▲",
+                "why.title": "Warum ComPDF",
+                "why.1t": "Enterprise-Performance",
+                "why.1d": "Übertrifft iText in 8 von 9 Benchmark-Kategorien — bei Single- und Multi-Thread-Workloads.",
+                "why.2t": "Transparente, planbare Preise",
+                "why.2d": "Keine Pro-Dokument-Gebühren, keine Überraschungs-Audits. Sichere Budgetplanung mit Pro-Plattform- oder Pro-Funktion-Lizenzen.",
+                "why.3t": "Null Open-Source-Risiko",
+                "why.3d": "100 % eigenes IP mit klarer kommerzieller Lizenz. Kein AGPL-Risiko, keine aufwendigen Rechts-Audits.",
+                "why.4t": "24/5 Technischer Support",
+                "why.4d": "1:1-Support mit umfassender Doku, regelmäßigen Updates und End-to-End-Migrationshilfe.",
+                "why.5t": "Flexible Deployment-Optionen",
+                "why.5d": "Cloud-API, selbst gehostet oder hybrid — Java, C#, C++, Web und Mobile.",
+                "form.title": "Mit ComPDF loslegen",
+                "form.sub": "Erzählen Sie uns von Ihrem Projekt — wir liefern einen maßgeschneiderten Evaluierungsplan.",
+                "form.name": "Vollständiger Name *",
+                "form.email": "Geschäftliche E-Mail *",
+                "form.phone": "Telefon",
+                "form.pdflib": "Aktuelle PDF-Bibliothek",
+                "form.ph.pdflib": "z. B. iText 7 / iText 9.x",
+                "form.project": "Projektbeschreibung",
+                "form.ph.project": "Dokumenttypen, Volumen, Deployment, Zeitplan …",
+                "form.submit": "Absenden",
+                "form.privacy": "Mit dem Absenden akzeptieren Sie die <a href=\"https://www.compdf.com/privacy-policy\" target=\"_blank\" class=\"underline\">Datenschutzerklärung</a>. Ihre Daten werden vertraulich behandelt.",
+                "form.alert": "Vielen Dank! Ein ComPDF-Spezialist meldet sich in Kürze bei Ihnen.",
+                "val.required": "Dieses Feld ist erforderlich.",
+                "val.email": "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+                "val.tooShort": "Bitte geben Sie mindestens {minLength} Zeichen ein.",
+                "val.pattern": "Bitte halten Sie das angeforderte Format ein.",
+                "ft.c1": "Beliebte Produkte",
+                "ft.c2": "Entwickler",
+                "ft.c3": "Lösungen",
+                "ft.c4": "Unternehmen & Ressourcen",
+                "ft.sub.docs": "Dokumentation",
+                "ft.sub.comm": "Community",
+                "ft.sub.industry": "Branchenlösungen",
+                "ft.sub.web": "Web-Integrationen",
+                "ft.sub.lowcode": "Low-Code",
+                "ft.sub.company": "Unternehmen",
+                "ft.sub.resources": "Ressourcen",
+                "ft.copyright": "© 2014-2026 PDF Technologies, Inc., ein Unternehmen von KDAN. Alle Rechte vorbehalten.",
+                "ft.legal.privacy": "Datenschutz",
+                "ft.legal.terms": "Nutzungsbedingungen",
+                "ft.legal.security": "Sicherheitsrichtlinie",
+                "ft.legal.cookie": "Cookie-Einstellungen",
+                "ft.l.conversion": "Konvertierungs-SDK", "ft.l.pdfgen": "PDF-Generierung", "ft.l.server": "Server SDK",
+                "ft.l.aiparse": "KI-Dokumentenanalyse","ft.l.aiextract": "KI-Dokumentenextraktion", "ft.l.kb": "Unternehmens-Wissensdatenbank", "ft.l.loginapi": "Bei API anmelden",
+                "ft.l.webguide": "Web-Leitfäden", "ft.l.javaguide": "Java-Leitfäden", "ft.l.netguide": ".NET-Leitfäden", "ft.l.androidguide": "Android-Leitfäden",
+                "ft.l.iosguide": "iOS-Leitfäden", "ft.l.flutterguide": "Flutter-Leitfäden", "ft.l.apiref": "API-Referenz", "ft.l.selfhost": "Self-hosted-Dokumentation",
+                "ft.l.freetrial": "Kostenlose Testversion", "ft.l.techsup": "Technischer Support",
+                "ft.l.construction": "Bauwesen", "ft.l.education": "Bildung", "ft.l.aviation": "Luftfahrt", "ft.l.printing": "Druckwesen",
+                "ft.l.manufacturing": "Fertigung", "ft.l.healthcare": "Gesundheitswesen", "ft.l.finance": "Finanzen", "ft.l.government": "Behörden", "ft.l.commlicense": "Community-Lizenz",
+                "ft.l.about": "Über uns", "ft.l.contact": "Kontakt", "ft.l.press": "Pressekit & Vertriebskit", "ft.l.reseller": "Reseller werden", "ft.l.partners": "Partner",
+                "ft.l.blog": "Blog", "ft.l.casestudies": "Fallstudien", "ft.l.faq": "Technische FAQs",
+                "ty.title": "Vielen Dank für Ihre Kontaktaufnahme!", "ty.desc": "Wir haben Ihre Nachricht erhalten.<br>Wir melden uns innerhalb von 1 Werktag bei Ihnen.",
+                "ty.home": "zurück zur Startseite", "ty.tutorials": "weitere Tutorials ansehen", "ty.follow": "Folgen Sie uns"
+            },
+            "fr": {
+                "nav.trial": "Essai gratuit",
+                "nav.contact": "Contacter les ventes",
+                "hero.badge": "ComPDF vs iText — Un choix plus intelligent",
+                "hero.t1": "Mêmes capacités.",
+                "hero.t2": "Meilleur rapport qualité-prix.",
+                "hero.t3": "Intégration plus rapide.",
+                "hero.desc": "ComPDF offre une génération PDF de niveau entreprise avec toutes les fonctionnalités attendues d'iText — plus la création native de tableaux via API, une tarification transparente et un support dédié 24/5. Accélérez vos flux documentaires sans surcoût.",
+                "hero.cta1": "Démarrer l'essai gratuit",
+                "hero.cta2": "Demander une consultation technique",
+                "hero.output": "✓ invoice.pdf — généré avec succès",
+                "hero.cap1": "Générer & rendre",
+                "hero.cap2": "Visualiser & annoter",
+                "hero.cap3": "Convertir & extraire",
+                "hero.cap4": "Analyse IA de documents",
+                "vp1.t": "Génération PDF haute performance",
+                "vp1.d": "Moteur nouvelle génération offrant une vitesse et une fidélité de mise en page de pointe pour HTML-vers-PDF et génération de tableaux via API.",
+                "vp2.t": "Tarification transparente et compétitive",
+                "vp2.d": "Licence par plateforme / par fonctionnalité, sans limites de volume cachées — TCO nettement réduit.",
+                "vp3.t": "Licence commerciale claire",
+                "vp3.d": "PI 100 % développée en interne avec licence commerciale claire. Zéro risque viral AGPL, zéro frais-surprise.",
+                "vp4.t": "SDK complet avec UI intégrée",
+                "vp4.d": "Bibliothèque UI industrielle : générer → afficher → annoter → éditer, prête à l'emploi. Aucun développement front supplémentaire.",
+                "cmp.title": "ComPDF vs iText : comparaison directe",
+                "cmp.sub": "Au-delà de la parité fonctionnelle, les équipes évaluent le risque de licence, le coût total, la vitesse d'intégration et la qualité du support.",
+                "cmp.h1": "Critère",
+                "cmp.r1c": "Génération de documents",
+                "cmp.r1a": "Moteur nouvelle génération haute précision avec génération PDF dynamique, logique complexe et création native de tableaux via API.",
+                "cmp.r1b": "Architecture traditionnelle, robuste mais moins flexible pour les mises en page complexes et l'intégration IA moderne.",
+                "cmp.r2c": "Licence & coût",
+                "cmp.r2a": "Tarification transparente par plateforme, sans limites cachées. TCO très compétitif.",
+                "cmp.r2b": "Facturation par serveur / document / utilisateur avec risques viraux AGPL. Coûts de conformité élevés.",
+                "cmp.r3c": "UI multiplateforme",
+                "cmp.r3a": "Bibliothèque UI industrielle intégrée pour un flux complet génération–affichage–annotation–édition.",
+                "cmp.r3b": "Moteur uniquement — aucune couche front. Plusieurs mois de développement UI supplémentaires.",
+                "cmp.r4c": "Efficacité dev",
+                "cmp.r4a": "API moderne, documentation complète et support 24/5 hautement réactif.",
+                "cmp.r4b": "Courbe d'apprentissage raide avec API héritées. Support premium en supplément coûteux.",
+                "cmp.r5c": "Risque de conformité",
+                "cmp.r5a": "Licence commerciale claire avec PI 100 % indépendante. Aucun piège open-source.",
+                "cmp.r5b": "Double licence AGPL/Commerciale, risques juridiques, audits lourds et frais-surprise.",
+                "cmp.btn": "Obtenir un rapport de comparaison détaillé",
+                "wf.title": "Capacités clés de génération PDF",
+                "wf.sub": "Des factures et contrats aux formulaires de conformité et rapports d'analyse — ComPDF propulse les pipelines documentaires d'entreprise avec rapidité et précision.",
+                "wf1.t": "Modèle HTML → PDF",
+                "wf1.d": "Transformez des modèles HTML/CSS avec liaison dynamique de données en PDF au pixel près. Support CSS complet : flexbox, grid, polices personnalisées.",
+                "wf2.t": "Formulaires PDF dynamiques",
+                "wf2.d": "Création et remplissage automatisés pour RH, finance et conformité. Champs interactifs, cases à cocher, listes, signatures électroniques.",
+                "wf3.t": "Génération native de tableaux via API",
+                "wf3.d": "Créez des tableaux PDF complexes directement via API — sans rendu navigateur. Idéal pour serveurs, fort volume et environnements headless.",
+                "bm.title": "Benchmark de performance : ComPDF vs iText",
+                "bm.sub": "Des benchmarks indépendants montrent que ComPDF surpasse iText 9.4.0 sur les scénarios clés de génération PDF.",
+                "bm.env": "Environnement de test",
+                "bm.envCompdf": "<strong>ComPDF :</strong> Java PDF Generation Library V1.0.0",
+                "bm.envItext": "<strong>iText :</strong> V9.4.0",
+                "bm.h1": "Scénario de test",
+                "bm.s1": "Performance globale",
+                "bm.s2": "Rendu de texte complexe",
+                "bm.s3": "Intégration d'images haute résolution",
+                "bm.s4": "Rendu des styles CSS de bordure",
+                "bm.s5": "Structure et style de tableaux complexes",
+                "bm.s6": "Rendu couleur et CSS mixte",
+                "bm.s7": "Éléments de bloc imbriqués",
+                "bm.s8": "Listes multiniveaux et puces personnalisées",
+                "bm.st": "Mono-thread",
+                "bm.mt": "Multi-thread (8)",
+                "bm.muchLonger": "Nettement plus lent",
+                "bm.longer": "Plus lent",
+                "bm.faster": "Plus rapide",
+                "bm.expand": "Afficher tous les résultats ▼",
+                "bm.collapse": "Réduire ▲",
+                "why.title": "Pourquoi choisir ComPDF",
+                "why.1t": "Performance de niveau entreprise",
+                "why.1d": "Surpasse iText dans 8 catégories sur 9, en mono et multi-thread.",
+                "why.2t": "Tarification transparente et prévisible",
+                "why.2d": "Aucun frais par document, aucun audit-surprise. Budget maîtrisé avec licences par plateforme ou par fonctionnalité.",
+                "why.3t": "Zéro risque open source",
+                "why.3d": "PI 100 % indépendante avec licence commerciale claire. Zéro risque viral AGPL, zéro audit juridique lourd.",
+                "why.4t": "Support technique dédié 24/5",
+                "why.4d": "Support 1:1 avec documentation complète, mises à jour régulières et accompagnement de migration de bout en bout.",
+                "why.5t": "Options de déploiement flexibles",
+                "why.5d": "API cloud, auto-hébergé ou hybride — Java, C#, C++, Web et mobile.",
+                "form.title": "Démarrer avec ComPDF",
+                "form.sub": "Parlez-nous de votre projet et nous vous proposerons un plan d'évaluation sur mesure.",
+                "form.name": "Nom complet *",
+                "form.email": "E-mail professionnel *",
+                "form.phone": "Téléphone",
+                "form.pdflib": "Bibliothèque PDF actuelle",
+                "form.ph.pdflib": "ex. iText 7 / iText 9.x",
+                "form.project": "Description du projet",
+                "form.ph.project": "Types de documents, volume, déploiement, calendrier…",
+                "form.submit": "Envoyer",
+                "form.privacy": "En soumettant, vous acceptez la <a href=\"https://www.compdf.com/privacy-policy\" target=\"_blank\" class=\"underline\">Politique de confidentialité</a>. Vos données resteront confidentielles.",
+                "form.alert": "Merci ! Un spécialiste ComPDF vous contactera très prochainement.",
+                "val.required": "Ce champ est obligatoire.",
+                "val.email": "Veuillez saisir une adresse e-mail valide.",
+                "val.tooShort": "Veuillez saisir au moins {minLength} caractères.",
+                "val.pattern": "Veuillez respecter le format demandé.",
+                "ft.c1": "Produits populaires",
+                "ft.c2": "Développeurs",
+                "ft.c3": "Solutions",
+                "ft.c4": "Entreprise & ressources",
+                "ft.sub.docs": "Documentation",
+                "ft.sub.comm": "Communauté",
+                "ft.sub.industry": "Solutions sectorielles",
+                "ft.sub.web": "Intégrations Web",
+                "ft.sub.lowcode": "Low-Code",
+                "ft.sub.company": "Entreprise",
+                "ft.sub.resources": "Ressources",
+                "ft.copyright": "© 2014-2026 PDF Technologies, Inc., une société KDAN. Tous droits réservés.",
+                "ft.legal.privacy": "Politique de confidentialité",
+                "ft.legal.terms": "Conditions de service",
+                "ft.legal.security": "Politique de sécurité",
+                "ft.legal.cookie": "Paramètres des cookies",
+                "ft.l.conversion": "SDK de conversion", "ft.l.pdfgen": "Génération de PDF", "ft.l.server": "SDK Serveur",
+                "ft.l.aiparse": "Analyse de documents par IA","ft.l.aiextract": "Extraction de documents par IA", "ft.l.kb": "Base de connaissances d'entreprise", "ft.l.loginapi": "Connexion à l'API",
+                "ft.l.webguide": "Guides Web", "ft.l.javaguide": "Guides Java", "ft.l.netguide": "Guides .NET", "ft.l.androidguide": "Guides Android",
+                "ft.l.iosguide": "Guides iOS", "ft.l.flutterguide": "Guides Flutter", "ft.l.apiref": "Référence API", "ft.l.selfhost": "Documentation auto-hébergée",
+                "ft.l.freetrial": "Essai gratuit", "ft.l.techsup": "Support technique",
+                "ft.l.construction": "Construction", "ft.l.education": "Éducation", "ft.l.aviation": "Aviation", "ft.l.printing": "Impression",
+                "ft.l.manufacturing": "Industrie", "ft.l.healthcare": "Santé", "ft.l.finance": "Finance", "ft.l.government": "Gouvernement", "ft.l.commlicense": "Licence communautaire",
+                "ft.l.about": "À propos", "ft.l.contact": "Contactez-nous", "ft.l.press": "Kit presse & Kit ventes", "ft.l.reseller": "Devenir revendeur", "ft.l.partners": "Partenaires",
+                "ft.l.blog": "Blog", "ft.l.casestudies": "Études de cas", "ft.l.faq": "FAQ techniques",
+                "ty.title": "Merci de nous avoir contactés !", "ty.desc": "Nous avons bien reçu votre message.<br>Nous vous recontacterons sous 1 jour ouvré.",
+                "ty.home": "retour à l'accueil", "ty.tutorials": "voir plus de tutoriels", "ty.follow": "Suivez-nous"
+            },
+            "ru": {
+                "nav.trial": "Бесплатная версия",
+                "nav.contact": "Связаться с отделом продаж",
+                "hero.badge": "ComPDF vs iText — Разумный выбор",
+                "hero.t1": "Те же возможности.",
+                "hero.t2": "Выгоднее.",
+                "hero.t3": "Быстрая интеграция.",
+                "hero.desc": "ComPDF — это корпоративная генерация PDF со всеми функциями iText, плюс нативное создание таблиц через API, прозрачные цены и выделенная поддержка 24/5. Ускорьте документные процессы без лишних затрат.",
+                "hero.cta1": "Попробовать бесплатно",
+                "hero.cta2": "Запросить техническую консультацию",
+                "hero.output": "✓ invoice.pdf — успешно создан",
+                "hero.cap1": "Генерация и рендеринг",
+                "hero.cap2": "Просмотр и аннотации",
+                "hero.cap3": "Конвертация и извлечение",
+                "hero.cap4": "ИИ-анализ документов",
+                "vp1.t": "Высокопроизводительная генерация PDF",
+                "vp1.d": "Движок нового поколения с передовой скоростью и точностью верстки для HTML → PDF и создания таблиц через API.",
+                "vp2.t": "Прозрачные и конкурентные цены",
+                "vp2.d": "Лицензирование по платформам / функциям без скрытых лимитов — значительно ниже TCO.",
+                "vp3.t": "Чистая коммерческая лицензия",
+                "vp3.d": "100 % собственная разработка с прозрачной коммерческой лицензией. Без AGPL-рисков и скрытых доплат.",
+                "vp4.t": "Полный SDK со встроенным UI",
+                "vp4.d": "Промышленная UI-библиотека: генерация → просмотр → аннотации → редактирование. Без разработки фронтенда.",
+                "cmp.title": "ComPDF vs iText: прямое сравнение",
+                "cmp.sub": "Помимо функционального паритета команды оценивают лицензионные риски, совокупные расходы, скорость интеграции и качество поддержки.",
+                "cmp.h1": "Критерий",
+                "cmp.r1c": "Генерация документов",
+                "cmp.r1a": "Движок нового поколения с высокой точностью, динамической генерацией PDF, сложной логикой и нативными API-таблицами.",
+                "cmp.r1b": "Традиционная архитектура — надежная, но менее гибкая для сложной верстки и современной ИИ-интеграции.",
+                "cmp.r2c": "Лицензирование и стоимость",
+                "cmp.r2a": "Прозрачные цены по платформам без скрытых лимитов. Высоко конкурентный TCO.",
+                "cmp.r2b": "Тарификация по серверам / документам / пользователям с AGPL-рисками. Высокие затраты на комплаенс.",
+                "cmp.r3c": "Кросс-платформенный UI",
+                "cmp.r3a": "Встроенная промышленная UI-библиотека покрывает полный цикл генерация–просмотр–аннотации–редактирование.",
+                "cmp.r3b": "Только движок — без фронтенда. Потребуются месяцы дополнительной UI-разработки.",
+                "cmp.r4c": "Эффективность разработки",
+                "cmp.r4a": "Современный API, полная документация, отзывчивая поддержка 24/5.",
+                "cmp.r4b": "Крутая кривая обучения и легаси-API. Премиум-поддержка за дополнительную плату.",
+                "cmp.r5c": "Риск комплаенса",
+                "cmp.r5a": "Чистая коммерческая лицензия с полностью независимой IP. Никаких open-source-ловушек.",
+                "cmp.r5b": "Двойное AGPL/коммерческое лицензирование с юридическими рисками, сложными аудитами и доплатами.",
+                "cmp.btn": "Получить подробный отчёт сравнения",
+                "wf.title": "Ключевые возможности генерации PDF",
+                "wf.sub": "От счетов и контрактов до комплаенс-форм и аналитики — ComPDF обеспечивает быстрые и точные документные пайплайны предприятия.",
+                "wf1.t": "HTML-шаблон → PDF",
+                "wf1.d": "Превращайте HTML/CSS-шаблоны с динамическим связыванием данных в пиксельно точные PDF. Полная поддержка CSS: flexbox, grid, кастомные шрифты.",
+                "wf2.t": "Динамические PDF-формы",
+                "wf2.d": "Автоматическое создание и заполнение форм для HR, финансов и комплаенса. Интерактивные поля, чекбоксы, выпадающие списки, ЭЦП.",
+                "wf3.t": "Нативная генерация таблиц через API",
+                "wf3.d": "Создавайте сложные PDF-таблицы через API без браузерного рендеринга. Идеально для серверных и headless-окружений с высокой нагрузкой.",
+                "bm.title": "Бенчмарк производительности: ComPDF vs iText",
+                "bm.sub": "Независимые тесты показывают: ComPDF обгоняет iText 9.4.0 в ключевых сценариях генерации PDF.",
+                "bm.env": "Тестовая среда",
+                "bm.envCompdf": "<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0",
+                "bm.envItext": "<strong>iText:</strong> V9.4.0",
+                "bm.h1": "Сценарий теста",
+                "bm.s1": "Общая производительность",
+                "bm.s2": "Рендеринг сложного текста",
+                "bm.s3": "Встраивание изображений высокого разрешения",
+                "bm.s4": "Рендеринг CSS-рамок",
+                "bm.s5": "Сложные таблицы и стили",
+                "bm.s6": "Цвета и смешанный CSS-рендеринг",
+                "bm.s7": "Вложенные блочные элементы",
+                "bm.s8": "Многоуровневые списки и маркеры",
+                "bm.st": "Однопоточный",
+                "bm.mt": "Многопоточный (8)",
+                "bm.muchLonger": "Заметно медленнее",
+                "bm.longer": "Медленнее",
+                "bm.faster": "Быстрее",
+                "bm.expand": "Показать все результаты ▼",
+                "bm.collapse": "Свернуть ▲",
+                "why.title": "Почему ComPDF",
+                "why.1t": "Корпоративная производительность",
+                "why.1d": "Обгоняет iText в 8 из 9 категорий — в одно- и многопоточных нагрузках.",
+                "why.2t": "Прозрачные предсказуемые цены",
+                "why.2d": "Без оплаты за документ и неожиданных аудитов. Планируйте бюджет с лицензиями по платформам или функциям.",
+                "why.3t": "Ноль open-source рисков",
+                "why.3d": "100 % собственная IP и чистая коммерческая лицензия. Без AGPL-риска и громоздких юридических аудитов.",
+                "why.4t": "Выделенная поддержка 24/5",
+                "why.4d": "Индивидуальная поддержка, полная документация, регулярные обновления и сопровождение миграции.",
+                "why.5t": "Гибкие варианты развертывания",
+                "why.5d": "Облачный API, self-hosted или гибрид — Java, C#, C++, Web и мобильные.",
+                "form.title": "Начните с ComPDF",
+                "form.sub": "Расскажите о проекте — мы подготовим индивидуальный план оценки.",
+                "form.name": "Полное имя *",
+                "form.email": "Рабочая почта *",
+                "form.phone": "Телефон",
+                "form.pdflib": "Текущая PDF-библиотека",
+                "form.ph.pdflib": "напр., iText 7 / iText 9.x",
+                "form.project": "Описание проекта",
+                "form.ph.project": "Типы документов, объемы, развертывание, сроки…",
+                "form.submit": "Отправить",
+                "form.privacy": "Отправляя форму, вы принимаете <a href=\"https://www.compdf.com/privacy-policy\" target=\"_blank\" class=\"underline\">Политику конфиденциальности</a>. Ваши данные останутся конфиденциальными.",
+                "form.alert": "Спасибо! Специалист ComPDF свяжется с вами в ближайшее время.",
+                "val.required": "Это поле обязательно.",
+                "val.email": "Введите корректный email.",
+                "val.tooShort": "Введите не менее {minLength} символов.",
+                "val.pattern": "Пожалуйста, соответствуйте запрошенному формату.",
+                "ft.c1": "Популярные продукты",
+                "ft.c2": "Разработчикам",
+                "ft.c3": "Решения",
+                "ft.c4": "Компания и ресурсы",
+                "ft.sub.docs": "Документация",
+                "ft.sub.comm": "Сообщество",
+                "ft.sub.industry": "Отраслевые решения",
+                "ft.sub.web": "Web-интеграции",
+                "ft.sub.lowcode": "Low-Code",
+                "ft.sub.company": "Компания",
+                "ft.sub.resources": "Ресурсы",
+                "ft.copyright": "© 2014-2026 PDF Technologies, Inc., компания группы KDAN. Все права защищены.",
+                "ft.legal.privacy": "Политика конфиденциальности",
+                "ft.legal.terms": "Условия обслуживания",
+                "ft.legal.security": "Политика безопасности",
+                "ft.legal.cookie": "Настройки cookie",
+                "ft.l.conversion": "SDK конвертации", "ft.l.pdfgen": "Генерация PDF", "ft.l.server": "Серверный SDK",
+                "ft.l.aiparse": "ИИ-анализ документов","ft.l.aiextract": "ИИ-извлечение документов", "ft.l.kb": "Корпоративная база знаний", "ft.l.loginapi": "Войти в API",
+                "ft.l.webguide": "Руководства Web", "ft.l.javaguide": "Руководства Java", "ft.l.netguide": "Руководства .NET", "ft.l.androidguide": "Руководства Android",
+                "ft.l.iosguide": "Руководства iOS", "ft.l.flutterguide": "Руководства Flutter", "ft.l.apiref": "Справочник API", "ft.l.selfhost": "Документация Self-hosted",
+                "ft.l.freetrial": "Бесплатная пробная версия", "ft.l.techsup": "Техническая поддержка",
+                "ft.l.construction": "Строительство", "ft.l.education": "Образование", "ft.l.aviation": "Авиация", "ft.l.printing": "Полиграфия",
+                "ft.l.manufacturing": "Производство", "ft.l.healthcare": "Здравоохранение", "ft.l.finance": "Финансы", "ft.l.government": "Государственный сектор", "ft.l.commlicense": "Лицензия сообщества",
+                "ft.l.about": "О нас", "ft.l.contact": "Связаться с нами", "ft.l.press": "Пресс-кит & Набор для продаж", "ft.l.reseller": "Стать реселлером", "ft.l.partners": "Партнёры",
+                "ft.l.blog": "Блог", "ft.l.casestudies": "Кейсы", "ft.l.faq": "Технические FAQ",
+                "ty.title": "Спасибо за обращение!", "ty.desc": "Мы получили ваше сообщение.<br>Мы свяжемся с вами в течение 1 рабочего дня.",
+                "ty.home": "вернуться на главную", "ty.tutorials": "больше обучающих материалов", "ty.follow": "Подписывайтесь"
+            },
+            "ko": {
+                "nav.trial": "무료 체험",
+                "nav.contact": "영업팀 문의",
+                "hero.badge": "ComPDF vs iText — 더 현명한 선택",
+                "hero.t1": "동일한 기능.",
+                "hero.t2": "더 나은 가치.",
+                "hero.t3": "더 빠른 통합.",
+                "hero.desc": "ComPDF는 iText가 제공하는 모든 기능을 갖춘 엔터프라이즈급 PDF 생성 엔진에 네이티브 API 표 생성, 투명한 가격, 전담 24/5 지원을 더합니다. 추가 비용 없이 문서 워크플로를 가속하세요.",
+                "hero.cta1": "무료로 시작하기",
+                "hero.cta2": "기술 상담 요청",
+                "hero.output": "✓ invoice.pdf — 생성 완료",
+                "hero.cap1": "생성 및 렌더링",
+                "hero.cap2": "보기 및 주석",
+                "hero.cap3": "변환 및 추출",
+                "hero.cap4": "AI 문서 파싱",
+                "vp1.t": "고성능 PDF 생성",
+                "vp1.d": "HTML → PDF와 API 기반 표 생성에서 업계 최고의 처리 속도와 레이아웃 정확도를 제공하는 차세대 엔진.",
+                "vp2.t": "투명하고 경쟁력 있는 가격",
+                "vp2.d": "플랫폼별/기능별 라이선싱에 숨은 용량 제한이 없어 TCO를 크게 낮춥니다.",
+                "vp3.t": "깔끔한 상업용 라이선스",
+                "vp3.d": "100% 자체 개발 IP와 명확한 상업용 라이선스. AGPL 전파 위험과 깜짝 비용이 없습니다.",
+                "vp4.t": "UI 내장 전주기 SDK",
+                "vp4.d": "산업용 UI 라이브러리로 생성 → 표시 → 주석 → 편집까지 즉시 지원. 별도 프런트엔드 개발이 필요 없습니다.",
+                "cmp.title": "ComPDF vs iText: 항목별 비교",
+                "cmp.sub": "기능 이상의 요소 — 라이선스 리스크, 총비용, 통합 속도, 지원 품질을 함께 검토합니다.",
+                "cmp.h1": "평가 항목",
+                "cmp.r1c": "문서 생성",
+                "cmp.r1a": "동적 PDF 생성, 복잡한 로직, 네이티브 API 표 생성을 지원하는 차세대 고정밀 엔진.",
+                "cmp.r1b": "견고한 전통 아키텍처이지만, 복잡한 레이아웃과 최신 AI 통합에는 유연성이 부족합니다.",
+                "cmp.r2c": "라이선스 및 비용",
+                "cmp.r2a": "숨은 용량 제한 없는 투명한 플랫폼별 가격. TCO 경쟁력이 매우 높습니다.",
+                "cmp.r2b": "서버/문서/사용자 기반 과금에 AGPL 전파 위험. 컴플라이언스 비용이 높습니다.",
+                "cmp.r3c": "크로스플랫폼 UI",
+                "cmp.r3a": "내장 산업용 UI 라이브러리로 생성–표시–주석–편집 워크플로를 완전히 커버합니다.",
+                "cmp.r3b": "엔진만 제공되며 프런트엔드 레이어가 없어 수개월의 추가 UI 개발이 필요합니다.",
+                "cmp.r4c": "개발 효율",
+                "cmp.r4a": "현대적인 API, 풍부한 문서, 빠른 응답의 24/5 기술 지원.",
+                "cmp.r4b": "레거시 API로 학습 곡선이 가파르며, 프리미엄 지원은 별도 고가 옵션입니다.",
+                "cmp.r5c": "컴플라이언스 리스크",
+                "cmp.r5a": "완전한 자체 IP와 명확한 상업용 라이선스로 오픈소스 함정이 없습니다.",
+                "cmp.r5b": "AGPL/상업 이중 라이선스로 법적 리스크, 번거로운 감사, 깜짝 비용이 발생할 수 있습니다.",
+                "cmp.btn": "상세 비교 보고서 받기",
+                "wf.title": "핵심 PDF 생성 기능",
+                "wf.sub": "인보이스·계약서부터 컴플라이언스 양식·분석 리포트까지 — ComPDF가 기업 문서 파이프라인을 빠르고 정확하게 구동합니다.",
+                "wf1.t": "HTML 템플릿 → PDF",
+                "wf1.d": "동적 데이터 바인딩이 적용된 HTML/CSS 템플릿을 픽셀 단위로 정확한 PDF로 변환. Flexbox, Grid, 커스텀 폰트 모두 지원.",
+                "wf2.t": "동적 PDF 양식",
+                "wf2.d": "HR·재무·컴플라이언스를 위한 양식 자동 생성 및 입력. 인터랙티브 필드, 체크박스, 드롭다운, 전자서명 지원.",
+                "wf3.t": "네이티브 API 표 생성",
+                "wf3.d": "브라우저 렌더링 없이 API로 복잡한 PDF 표 생성. 서버사이드, 대용량, 헤드리스 환경에 최적.",
+                "bm.title": "성능 벤치마크: ComPDF vs iText",
+                "bm.sub": "독립 벤치마크에서 ComPDF가 주요 PDF 생성 시나리오 전반에서 iText 9.4.0을 앞섭니다.",
+                "bm.env": "테스트 환경",
+                "bm.envCompdf": "<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0",
+                "bm.envItext": "<strong>iText:</strong> V9.4.0",
+                "bm.h1": "테스트 시나리오",
+                "bm.s1": "종합 성능",
+                "bm.s2": "복잡한 텍스트 렌더링",
+                "bm.s3": "고해상도 이미지 삽입",
+                "bm.s4": "테두리 CSS 렌더링",
+                "bm.s5": "복잡한 표 구조 및 스타일",
+                "bm.s6": "색상 및 혼합 CSS 렌더링",
+                "bm.s7": "중첩 블록 요소",
+                "bm.s8": "다단계 리스트 및 커스텀 불릿",
+                "bm.st": "싱글 스레드",
+                "bm.mt": "멀티 스레드 (8)",
+                "bm.muchLonger": "훨씬 느림",
+                "bm.longer": "더 느림",
+                "bm.faster": "더 빠름",
+                "bm.expand": "전체 테스트 결과 보기 ▼",
+                "bm.collapse": "접기 ▲",
+                "why.title": "ComPDF를 선택해야 하는 이유",
+                "why.1t": "엔터프라이즈급 성능",
+                "why.1d": "싱글 및 멀티 스레드 워크로드에서 9개 벤치마크 중 8개 카테고리에서 iText를 능가합니다.",
+                "why.2t": "투명하고 예측 가능한 가격",
+                "why.2d": "문서당 과금 없음, 기습 감사 없음. 플랫폼·기능별 라이선스로 예산 계획이 쉬워집니다.",
+                "why.3t": "오픈소스 컴플라이언스 리스크 제로",
+                "why.3d": "100% 독립 IP와 깔끔한 상업용 라이선스. AGPL 전파 위험과 복잡한 법무 감사가 없습니다.",
+                "why.4t": "전담 24/5 기술 지원",
+                "why.4d": "1:1 지원과 방대한 문서, 정기 업데이트, 엔드투엔드 마이그레이션 가이드를 제공합니다.",
+                "why.5t": "유연한 배포 옵션",
+                "why.5d": "클라우드 API, 자체 호스팅, 하이브리드 — Java, C#, C++, Web, 모바일 지원.",
+                "form.title": "ComPDF 시작하기",
+                "form.sub": "프로젝트를 알려주시면 맞춤형 평가 플랜을 제공합니다.",
+                "form.name": "이름 *",
+                "form.email": "업무용 이메일 *",
+                "form.phone": "전화번호",
+                "form.pdflib": "현재 사용 중인 PDF 라이브러리",
+                "form.ph.pdflib": "예: iText 7 / iText 9.x",
+                "form.project": "프로젝트 설명",
+                "form.ph.project": "문서 유형, 규모, 배포 요구, 일정…",
+                "form.submit": "제출",
+                "form.privacy": "제출 시 <a href=\"https://www.compdf.com/privacy-policy\" target=\"_blank\" class=\"underline\">개인정보 처리방침</a>에 동의합니다. 데이터는 기밀로 보관됩니다.",
+                "form.alert": "감사합니다! ComPDF 전문가가 곧 연락드리겠습니다.",
+                "val.required": "필수 입력 항목입니다.",
+                "val.email": "올바른 이메일 주소를 입력하세요.",
+                "val.tooShort": "{minLength}자 이상 입력하세요.",
+                "val.pattern": "요청된 형식과 일치해야 합니다.",
+                "ft.c1": "인기 상품",
+                "ft.c2": "개발자",
+                "ft.c3": "솔루션",
+                "ft.c4": "회사 & 자료",
+                "ft.sub.docs": "문서",
+                "ft.sub.comm": "커뮤니티",
+                "ft.sub.industry": "산업별 솔루션",
+                "ft.sub.web": "Web 애플리케이션 통합",
+                "ft.sub.lowcode": "로우코드",
+                "ft.sub.company": "회사",
+                "ft.sub.resources": "자료 센터",
+                "ft.copyright": "© 2014-2026 PDF Technologies, Inc., KDAN 그룹사. All Rights Reserved.",
+                "ft.legal.privacy": "개인정보 처리방침",
+                "ft.legal.terms": "서비스 약관",
+                "ft.legal.security": "보안 정책",
+                "ft.legal.cookie": "쿠키 설정",
+                "ft.l.conversion": "변환 SDK", "ft.l.pdfgen": "PDF 생성", "ft.l.server": "서버 SDK",
+                "ft.l.aiparse": "AI 문서 구문 분석","ft.l.aiextract": "AI 문서 추출", "ft.l.kb": "기업 지식 기반", "ft.l.loginapi": "로그인 API",
+                "ft.l.webguide": "Web 가이드", "ft.l.javaguide": "Java 가이드", "ft.l.netguide": ".NET 가이드", "ft.l.androidguide": "Android 가이드",
+                "ft.l.iosguide": "iOS 가이드", "ft.l.flutterguide": "Flutter 가이드", "ft.l.apiref": "API 참조", "ft.l.selfhost": "자체 호스팅 문서",
+                "ft.l.freetrial": "무료 체험", "ft.l.techsup": "기술 지원",
+                "ft.l.construction": "건축", "ft.l.education": "교육", "ft.l.aviation": "항공", "ft.l.printing": "인쇄",
+                "ft.l.manufacturing": "제조", "ft.l.healthcare": "의료", "ft.l.finance": "금융", "ft.l.government": "정부", "ft.l.commlicense": "중소기업 지원",
+                "ft.l.about": "회사 소개", "ft.l.contact": "문의하기", "ft.l.press": "뉴스 및 미디어 키트", "ft.l.reseller": "리셀러 되기", "ft.l.partners": "파트너 되기",
+                "ft.l.blog": "블로그 글", "ft.l.casestudies": "사례 연구", "ft.l.faq": "자주 묻는 질문",
+                "ty.title": "문의해 주셔서 감사합니다!", "ty.desc": "메시지를 수신했습니다.<br>1 영업일 이내에 연락드리겠습니다.",
+                "ty.home": "홈페이지로 돌아가기", "ty.tutorials": "더 많은 튜토리얼 보기", "ty.follow": "팔로우하기"
+            },
+            "th": {
+                "nav.trial": "ทดลองใช้ฟรี",
+                "nav.contact": "ติดต่อฝ่ายขาย",
+                "hero.badge": "ComPDF vs iText — ทางเลือกที่ชาญฉลาดกว่า",
+                "hero.t1": "ความสามารถเทียบเท่า",
+                "hero.t2": "คุ้มค่ากว่า",
+                "hero.t3": "ผสานรวมเร็วกว่า",
+                "hero.desc": "ComPDF มอบการสร้าง PDF ระดับองค์กรพร้อมฟีเจอร์ครบครันแบบเดียวกับ iText — เพิ่มเติมด้วยการสร้างตารางผ่าน API แบบเนทีฟ ราคาโปร่งใส และการสนับสนุน 24/5 เร่งกระบวนการเอกสารโดยไม่มีค่าใช้จ่ายแฝง",
+                "hero.cta1": "เริ่มทดลองใช้ฟรี",
+                "hero.cta2": "ขอคำปรึกษาทางเทคนิค",
+                "hero.output": "✓ invoice.pdf — สร้างสำเร็จ",
+                "hero.cap1": "สร้างและเรนเดอร์",
+                "hero.cap2": "ดูและใส่คำอธิบาย",
+                "hero.cap3": "แปลงและสกัด",
+                "hero.cap4": "วิเคราะห์เอกสารด้วย AI",
+                "vp1.t": "การสร้าง PDF ประสิทธิภาพสูง",
+                "vp1.d": "เอนจินยุคใหม่ที่ให้ความเร็วและความแม่นยำของเลย์เอาต์ระดับชั้นนำสำหรับ HTML เป็น PDF และการสร้างตารางผ่าน API",
+                "vp2.t": "ราคาโปร่งใสและแข่งขันได้",
+                "vp2.d": "ลิขสิทธิ์ตามแพลตฟอร์ม/ตามฟีเจอร์ ไม่มีขีดจำกัดปริมาณแอบแฝง — ลด TCO อย่างมีนัยสำคัญ",
+                "vp3.t": "สัญญาอนุญาตเชิงพาณิชย์ที่ชัดเจน",
+                "vp3.d": "ทรัพย์สินทางปัญญาที่พัฒนาเองทั้งหมด 100% พร้อมสัญญาอนุญาตเชิงพาณิชย์ที่ชัดเจน ไม่มีความเสี่ยง AGPL หรือค่าใช้จ่ายแฝง",
+                "vp4.t": "SDK ครบวงจรพร้อม UI ในตัว",
+                "vp4.d": "ไลบรารี UI ระดับอุตสาหกรรม รองรับเวิร์กโฟลว์สร้าง → แสดง → ใส่คำอธิบาย → แก้ไข โดยไม่ต้องพัฒนาฟรอนต์เอนด์เพิ่ม",
+                "cmp.title": "ComPDF vs iText: เปรียบเทียบแบบทีละข้อ",
+                "cmp.sub": "นอกจากความเท่าเทียมด้านฟีเจอร์แล้ว ทีมยังประเมินความเสี่ยงด้านลิขสิทธิ์ ต้นทุนรวม ความเร็วในการผสานรวม และคุณภาพการสนับสนุน",
+                "cmp.h1": "เกณฑ์",
+                "cmp.r1c": "การสร้างเอกสาร",
+                "cmp.r1a": "เอนจินยุคใหม่ความแม่นยำสูง รองรับการสร้าง PDF แบบไดนามิก ตรรกะซับซ้อน และตาราง API แบบเนทีฟ",
+                "cmp.r1b": "สถาปัตยกรรมดั้งเดิม แข็งแกร่งแต่ยืดหยุ่นน้อยกว่าในเลย์เอาต์ซับซ้อนและการผสาน AI ยุคใหม่",
+                "cmp.r2c": "ลิขสิทธิ์และต้นทุน",
+                "cmp.r2a": "ราคาแบบแพลตฟอร์มโปร่งใส ไม่มีขีดจำกัดแอบแฝง TCO แข่งขันได้สูง",
+                "cmp.r2b": "คิดค่าใช้จ่ายตามเซิร์ฟเวอร์/เอกสาร/ผู้ใช้ ร่วมกับความเสี่ยง AGPL ต้นทุนการปฏิบัติตามข้อกำหนดสูง",
+                "cmp.r3c": "UI ข้ามแพลตฟอร์ม",
+                "cmp.r3a": "ไลบรารี UI ระดับอุตสาหกรรมครอบคลุมเวิร์กโฟลว์สร้าง–แสดง–คำอธิบาย–แก้ไข",
+                "cmp.r3b": "มีเฉพาะเอนจิน ไม่มีเลเยอร์ฟรอนต์เอนด์ ต้องพัฒนา UI เพิ่มอีกหลายเดือน",
+                "cmp.r4c": "ประสิทธิภาพนักพัฒนา",
+                "cmp.r4a": "API ทันสมัย เอกสารครบถ้วน การสนับสนุนเทคนิค 24/5 ที่ตอบสนองไว",
+                "cmp.r4b": "API รุ่นเก่ามีเส้นโค้งการเรียนรู้ชัน การสนับสนุนระดับพรีเมียมต้องจ่ายเพิ่มราคาสูง",
+                "cmp.r5c": "ความเสี่ยงด้านการปฏิบัติตามข้อกำหนด",
+                "cmp.r5a": "สัญญาอนุญาตเชิงพาณิชย์ชัดเจนพร้อม IP อิสระเต็มรูปแบบ ไม่มีกับดักโอเพนซอร์ส",
+                "cmp.r5b": "สัญญาอนุญาตคู่ AGPL/เชิงพาณิชย์ มีความเสี่ยงทางกฎหมาย ตรวจสอบยุ่งยาก และค่าใช้จ่ายแฝง",
+                "cmp.btn": "รับรายงานเปรียบเทียบฉบับละเอียด",
+                "wf.title": "ความสามารถหลักในการสร้าง PDF",
+                "wf.sub": "ตั้งแต่ใบแจ้งหนี้และสัญญา ไปจนถึงแบบฟอร์มการปฏิบัติตามข้อกำหนดและรายงานวิเคราะห์ — ComPDF ขับเคลื่อนไปป์ไลน์เอกสารองค์กรด้วยความเร็วและความแม่นยำ",
+                "wf1.t": "เทมเพลต HTML → PDF",
+                "wf1.d": "แปลงเทมเพลต HTML/CSS พร้อมการผูกข้อมูลแบบไดนามิกให้เป็น PDF ระดับพิกเซล รองรับ CSS ครบถ้วน: flexbox, grid, ฟอนต์กำหนดเอง",
+                "wf2.t": "ฟอร์ม PDF แบบไดนามิก",
+                "wf2.d": "สร้างและกรอกแบบฟอร์มอัตโนมัติสำหรับ HR การเงิน และการปฏิบัติตามข้อกำหนด รองรับฟิลด์อินเทอร์แอคทีฟ เช็คบ็อกซ์ ดรอปดาวน์ และลายเซ็นดิจิทัล",
+                "wf3.t": "การสร้างตารางผ่าน API แบบเนทีฟ",
+                "wf3.d": "สร้างตาราง PDF ที่ซับซ้อนผ่าน API โดยตรง — ไม่ต้องเรนเดอร์ผ่านเบราว์เซอร์ เหมาะกับเซิร์ฟเวอร์ ปริมาณสูง และสภาพแวดล้อม headless",
+                "bm.title": "เบนช์มาร์กประสิทธิภาพ: ComPDF vs iText",
+                "bm.sub": "ผลเบนช์มาร์กอิสระแสดงว่า ComPDF เหนือกว่า iText 9.4.0 ในสถานการณ์การสร้าง PDF หลัก",
+                "bm.env": "สภาพแวดล้อมการทดสอบ",
+                "bm.envCompdf": "<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0",
+                "bm.envItext": "<strong>iText:</strong> V9.4.0",
+                "bm.h1": "สถานการณ์ทดสอบ",
+                "bm.s1": "ประสิทธิภาพโดยรวม",
+                "bm.s2": "การเรนเดอร์ข้อความที่ซับซ้อน",
+                "bm.s3": "การฝังภาพความละเอียดสูง",
+                "bm.s4": "การเรนเดอร์ CSS ขอบ",
+                "bm.s5": "โครงสร้างและสไตล์ตารางที่ซับซ้อน",
+                "bm.s6": "การเรนเดอร์สีและ CSS ผสม",
+                "bm.s7": "องค์ประกอบบล็อกซ้อน",
+                "bm.s8": "รายการหลายระดับและบูลเล็ตแบบกำหนดเอง",
+                "bm.st": "เธรดเดียว",
+                "bm.mt": "มัลติเธรด (8)",
+                "bm.muchLonger": "ช้ากว่ามาก",
+                "bm.longer": "ช้ากว่า",
+                "bm.faster": "เร็วกว่า",
+                "bm.expand": "แสดงผลการทดสอบทั้งหมด ▼",
+                "bm.collapse": "ย่อ ▲",
+                "why.title": "ทำไมต้อง ComPDF",
+                "why.1t": "ประสิทธิภาพระดับองค์กร",
+                "why.1d": "เหนือกว่า iText ใน 8 จาก 9 หมวดเบนช์มาร์ก ทั้งงานแบบเธรดเดียวและมัลติเธรด",
+                "why.2t": "ราคาโปร่งใสคาดการณ์ได้",
+                "why.2d": "ไม่มีค่าใช้จ่ายต่อเอกสาร ไม่มีการตรวจสอบกะทันหัน วางแผนงบด้วยความมั่นใจด้วยลิขสิทธิ์ตามแพลตฟอร์มหรือฟีเจอร์",
+                "why.3t": "ปราศจากความเสี่ยงโอเพนซอร์ส",
+                "why.3d": "IP อิสระ 100% พร้อมสัญญาอนุญาตเชิงพาณิชย์ที่ชัดเจน ไม่มีความเสี่ยง AGPL และการตรวจสอบทางกฎหมายที่ยุ่งยาก",
+                "why.4t": "สนับสนุนทางเทคนิค 24/5",
+                "why.4d": "สนับสนุนแบบตัวต่อตัว พร้อมเอกสารครบถ้วน อัปเดตสม่ำเสมอ และคำแนะนำการย้ายระบบครบวงจร",
+                "why.5t": "ตัวเลือกการดีพลอยที่ยืดหยุ่น",
+                "why.5d": "คลาวด์ API, โฮสต์เอง, หรือไฮบริด — รองรับ Java, C#, C++, Web และมือถือ",
+                "form.title": "เริ่มต้นกับ ComPDF",
+                "form.sub": "บอกเราเกี่ยวกับโปรเจกต์ของคุณ แล้วเราจะจัดเตรียมแผนประเมินที่เหมาะสม",
+                "form.name": "ชื่อ-นามสกุล *",
+                "form.email": "อีเมลที่ทำงาน *",
+                "form.phone": "โทรศัพท์",
+                "form.pdflib": "ไลบรารี PDF ปัจจุบัน",
+                "form.ph.pdflib": "เช่น iText 7 / iText 9.x",
+                "form.project": "รายละเอียดโปรเจกต์",
+                "form.ph.project": "ประเภทเอกสาร ปริมาณ ความต้องการการดีพลอย กรอบเวลา…",
+                "form.submit": "ส่ง",
+                "form.privacy": "การส่งฟอร์มแสดงว่าคุณยอมรับ<a href=\"https://www.compdf.com/privacy-policy\" target=\"_blank\" class=\"underline\">นโยบายความเป็นส่วนตัว</a> ข้อมูลของคุณจะถูกเก็บเป็นความลับ",
+                "form.alert": "ขอบคุณ! ผู้เชี่ยวชาญ ComPDF จะติดต่อคุณในไม่ช้า",
+                "val.required": "จำเป็นต้องกรอกช่องนี้",
+                "val.email": "กรุณากรอกอีเมลที่ถูกต้อง",
+                "val.tooShort": "กรุณากรอกอย่างน้อย {minLength} ตัวอักษร",
+                "val.pattern": "กรุณากรอกตามรูปแบบที่กำหนด",
+                "ft.c1": "ผลิตภัณฑ์ยอดนิยม",
+                "ft.c2": "นักพัฒนา",
+                "ft.c3": "โซลูชัน",
+                "ft.c4": "บริษัทและแหล่งข้อมูล",
+                "ft.sub.docs": "เอกสาร",
+                "ft.sub.comm": "ชุมชน",
+                "ft.sub.industry": "โซลูชันอุตสาหกรรม",
+                "ft.sub.web": "การผสานรวม Web",
+                "ft.sub.lowcode": "Low-Code",
+                "ft.sub.company": "เกี่ยวกับบริษัท",
+                "ft.sub.resources": "แหล่งข้อมูล",
+                "ft.copyright": "© 2014-2026 PDF Technologies, Inc., บริษัทในเครือ KDAN สงวนลิขสิทธิ์ทั้งหมด",
+                "ft.legal.privacy": "นโยบายความเป็นส่วนตัว",
+                "ft.legal.terms": "ข้อกำหนดการให้บริการ",
+                "ft.legal.security": "นโยบายความปลอดภัย",
+                "ft.legal.cookie": "การตั้งค่าคุกกี้",
+                "ft.l.conversion": "SDK การแปลง", "ft.l.pdfgen": "การสร้าง PDF", "ft.l.server": "SDK เซิร์ฟเวอร์",
+                "ft.l.aiparse": "การวิเคราะห์เอกสารด้วย AI","ft.l.aiextract": "การดึงข้อมูลเอกสารด้วย AI", "ft.l.kb": "ฐานความรู้องค์กร", "ft.l.loginapi": "เข้าสู่ระบบ API",
+                "ft.l.webguide": "คู่มือ Web", "ft.l.javaguide": "คู่มือ Java", "ft.l.netguide": "คู่มือ .NET", "ft.l.androidguide": "คู่มือ Android",
+                "ft.l.iosguide": "คู่มือ iOS", "ft.l.flutterguide": "คู่มือ Flutter", "ft.l.apiref": "เอกสารอ้างอิง API", "ft.l.selfhost": "เอกสาร Self-hosted",
+                "ft.l.freetrial": "ทดลองใช้ฟรี", "ft.l.techsup": "ฝ่ายสนับสนุนด้านเทคนิค",
+                "ft.l.construction": "การก่อสร้าง", "ft.l.education": "การศึกษา", "ft.l.aviation": "การบิน", "ft.l.printing": "การพิมพ์",
+                "ft.l.manufacturing": "อุตสาหกรรมการผลิต", "ft.l.healthcare": "สุขภาพ", "ft.l.finance": "การเงิน", "ft.l.government": "ภาครัฐ", "ft.l.commlicense": "ใบอนุญาตชุมชน",
+                "ft.l.about": "เกี่ยวกับเรา", "ft.l.contact": "ติดต่อเรา", "ft.l.press": "ชุดสื่อ & ชุดการขาย", "ft.l.reseller": "เป็นตัวแทนจำหน่าย", "ft.l.partners": "พันธมิตร",
+                "ft.l.blog": "บล็อก", "ft.l.casestudies": "กรณีศึกษา", "ft.l.faq": "คำถามทางเทคนิคที่พบบ่อย",
+                "ty.title": "ขอบคุณที่ติดต่อเรา!", "ty.desc": "เราได้รับข้อความของคุณแล้ว<br>เราจะติดต่อกลับภายใน 1 วันทำการ",
+                "ty.home": "กลับสู่หน้าหลัก", "ty.tutorials": "ดูบทเรียนเพิ่มเติม", "ty.follow": "ติดตามเรา"
+            },
+            "ar": {
+                "nav.trial": "نسخة تجريبية مجانية",
+                "nav.contact": "التواصل مع المبيعات",
+                "hero.badge": "ComPDF مقابل iText — الخيار الأذكى",
+                "hero.t1": "قدرات مماثلة.",
+                "hero.t2": "قيمة أفضل.",
+                "hero.t3": "تكامل أسرع.",
+                "hero.desc": "يوفّر ComPDF إنشاء PDF على مستوى المؤسسات مع كل المزايا التي تتوقعها من iText — بالإضافة إلى إنشاء الجداول عبر API محليًا، وتسعير شفاف، ودعم مخصّص 24/5. سرّع سير عمل المستندات دون تكاليف إضافية.",
+                "hero.cta1": "بدء التجربة المجانية",
+                "hero.cta2": "طلب استشارة تقنية",
+                "hero.output": "✓ invoice.pdf — تم الإنشاء بنجاح",
+                "hero.cap1": "الإنشاء والعرض",
+                "hero.cap2": "العرض والتعليق",
+                "hero.cap3": "التحويل والاستخراج",
+                "hero.cap4": "تحليل المستندات بالذكاء الاصطناعي",
+                "vp1.t": "إنشاء PDF عالي الأداء",
+                "vp1.d": "محرّك من الجيل التالي يقدّم سرعة معالجة ودقّة تخطيط رائدة لتحويل HTML إلى PDF وإنشاء الجداول عبر API.",
+                "vp2.t": "تسعير شفاف وتنافسي",
+                "vp2.d": "ترخيص حسب المنصة / الميزة دون حدود حجم خفية — انخفاض كبير في إجمالي تكلفة الملكية.",
+                "vp3.t": "رخصة تجارية واضحة",
+                "vp3.d": "ملكية فكرية مطوّرة بنسبة 100% داخليًا مع رخصة تجارية واضحة. دون مخاطر AGPL أو رسوم مفاجئة.",
+                "vp4.t": "SDK كامل مع واجهة مدمجة",
+                "vp4.d": "مكتبة واجهة مستخدم بمستوى صناعي تتيح إنشاء → عرض → تعليق → تحرير جاهزة، دون تطوير واجهة أمامية إضافي.",
+                "cmp.title": "ComPDF مقابل iText: مقارنة جنبًا إلى جنب",
+                "cmp.sub": "إلى جانب تكافؤ الميزات، تقيّم الفرق مخاطر الترخيص والتكلفة الإجمالية وسرعة التكامل وجودة الدعم.",
+                "cmp.h1": "المعيار",
+                "cmp.r1c": "إنشاء المستندات",
+                "cmp.r1a": "محرّك دقيق من الجيل التالي يدعم إنشاء PDF ديناميكي ومنطقًا معقدًا وإنشاء جداول عبر API محليًا.",
+                "cmp.r1b": "بنية تقليدية قوية لكنها أقل مرونة في التخطيطات المعقدة وتكامل الذكاء الاصطناعي الحديث.",
+                "cmp.r2c": "الترخيص والتكلفة",
+                "cmp.r2a": "تسعير شفاف حسب المنصة دون حدود خفية. إجمالي تكلفة ملكية تنافسي للغاية.",
+                "cmp.r2b": "فوترة حسب الخادم / المستند / المستخدم مع مخاطر AGPL. تكاليف امتثال عالية.",
+                "cmp.r3c": "واجهة متعددة المنصات",
+                "cmp.r3a": "مكتبة واجهة صناعية مدمجة تغطي سير عمل الإنشاء–العرض–التعليق–التحرير بالكامل.",
+                "cmp.r3b": "محرّك فقط دون طبقة أمامية — تحتاج الفرق إلى أشهر إضافية من تطوير الواجهة.",
+                "cmp.r4c": "كفاءة التطوير",
+                "cmp.r4a": "تصميم API حديث ووثائق شاملة ودعم تقني 24/5 سريع الاستجابة.",
+                "cmp.r4b": "منحنى تعلّم حاد مع واجهات قديمة، والدعم المميز بتكاليف إضافية مرتفعة.",
+                "cmp.r5c": "مخاطر الامتثال",
+                "cmp.r5a": "رخصة تجارية واضحة وملكية فكرية مستقلة تمامًا. دون فخاخ مفتوحة المصدر.",
+                "cmp.r5b": "ترخيص مزدوج AGPL/تجاري عرضة لمخاطر قانونية وتدقيق مرهق ورسوم مفاجئة.",
+                "cmp.btn": "احصل على تقرير مقارنة تفصيلي",
+                "wf.title": "القدرات الأساسية لإنشاء PDF",
+                "wf.sub": "من الفواتير والعقود إلى نماذج الامتثال وتقارير التحليل — يشغّل ComPDF خطوط مستندات المؤسسة بسرعة ودقة.",
+                "wf1.t": "قالب HTML → PDF",
+                "wf1.d": "حوّل قوالب HTML/CSS مع ربط بيانات ديناميكي إلى PDF بدقة البكسل، مع دعم CSS كامل شاملًا flexbox وgrid والخطوط المخصّصة.",
+                "wf2.t": "نماذج PDF ديناميكية",
+                "wf2.d": "أتمتة إنشاء النماذج وتعبئتها للموارد البشرية والمالية والامتثال. دعم الحقول التفاعلية وخانات الاختيار والقوائم المنسدلة والتوقيع الرقمي.",
+                "wf3.t": "إنشاء الجداول عبر API محليًا",
+                "wf3.d": "أنشئ جداول PDF معقدة مباشرة عبر API دون الحاجة لعرض المتصفح. مثالي للخوادم والحجم الكبير والبيئات headless.",
+                "bm.title": "اختبار الأداء: ComPDF مقابل iText",
+                "bm.sub": "نتائج اختبار مستقلة تُظهر تفوّق ComPDF على iText 9.4.0 في سيناريوهات إنشاء PDF الرئيسية.",
+                "bm.env": "بيئة الاختبار",
+                "bm.envCompdf": "<strong>ComPDF:</strong> Java PDF Generation Library V1.0.0",
+                "bm.envItext": "<strong>iText:</strong> V9.4.0",
+                "bm.h1": "سيناريو الاختبار",
+                "bm.s1": "الأداء الإجمالي",
+                "bm.s2": "عرض النص المعقد",
+                "bm.s3": "تضمين الصور عالية الدقة",
+                "bm.s4": "عرض أنماط CSS للحدود",
+                "bm.s5": "بنية الجداول المعقدة وأنماطها",
+                "bm.s6": "عرض الألوان وCSS المختلط",
+                "bm.s7": "عناصر كتلة متداخلة",
+                "bm.s8": "قوائم متعدّدة المستويات ونقاط مخصّصة",
+                "bm.st": "أحادي المسار",
+                "bm.mt": "متعدّد المسارات (8)",
+                "bm.muchLonger": "أبطأ بكثير",
+                "bm.longer": "أبطأ",
+                "bm.faster": "أسرع",
+                "bm.expand": "عرض جميع نتائج الاختبار ▼",
+                "bm.collapse": "طيّ ▲",
+                "why.title": "لماذا ComPDF",
+                "why.1t": "أداء على مستوى المؤسسات",
+                "why.1d": "يتفوّق على iText في 8 من أصل 9 فئات اختبار في العمل الأحادي والمتعدد المسارات.",
+                "why.2t": "تسعير شفاف ويمكن التنبؤ به",
+                "why.2d": "بدون رسوم لكل مستند، وبدون تدقيقات مفاجئة. خطّط ميزانيتك بثقة مع تراخيص حسب المنصة أو الميزة.",
+                "why.3t": "صفر مخاطر الامتثال للمصدر المفتوح",
+                "why.3d": "ملكية فكرية مستقلة 100% مع رخصة تجارية واضحة. بدون مخاطر AGPL أو تدقيقات قانونية مرهقة.",
+                "why.4t": "دعم تقني مخصّص 24/5",
+                "why.4d": "دعم شخصي مع وثائق شاملة وتحديثات منتظمة وإرشادات ترحيل متكاملة.",
+                "why.5t": "خيارات نشر مرنة",
+                "why.5d": "API سحابي أو استضافة ذاتية أو هجين — بدعم Java وC#‎ وC++‎ وWeb وأجهزة الجوّال.",
+                "form.title": "ابدأ مع ComPDF",
+                "form.sub": "أخبرنا عن مشروعك وسنزوّدك بخطة تقييم مخصّصة.",
+                "form.name": "الاسم الكامل *",
+                "form.email": "البريد الإلكتروني للعمل *",
+                "form.phone": "الهاتف",
+                "form.pdflib": "مكتبة PDF الحالية",
+                "form.ph.pdflib": "مثلاً iText 7 / iText 9.x",
+                "form.project": "وصف المشروع",
+                "form.ph.project": "أنواع المستندات والحجم ومتطلبات النشر والجدول الزمني…",
+                "form.submit": "إرسال",
+                "form.privacy": "بالإرسال، فإنك توافق على <a href=\"https://www.compdf.com/privacy-policy\" target=\"_blank\" class=\"underline\">سياسة الخصوصية</a>. ستبقى بياناتك سرّية.",
+                "form.alert": "شكرًا لك! سيتواصل معك أحد متخصّصي ComPDF قريبًا.",
+                "val.required": "هذا الحقل مطلوب.",
+                "val.email": "الرجاء إدخال بريد إلكتروني صالح.",
+                "val.tooShort": "الرجاء إدخال {minLength} حرفًا على الأقل.",
+                "val.pattern": "الرجاء مطابقة الصيغة المطلوبة.",
+                "ft.c1": "المنتجات الشائعة",
+                "ft.c2": "المطوّرون",
+                "ft.c3": "الحلول",
+                "ft.c4": "الشركة والموارد",
+                "ft.sub.docs": "الوثائق",
+                "ft.sub.comm": "المجتمع",
+                "ft.sub.industry": "حلول القطاعات",
+                "ft.sub.web": "تكاملات الويب",
+                "ft.sub.lowcode": "Low-Code",
+                "ft.sub.company": "الشركة",
+                "ft.sub.resources": "الموارد",
+                "ft.copyright": "© 2014-2026 PDF Technologies, Inc., شركة تابعة لـ KDAN. جميع الحقوق محفوظة.",
+                "ft.legal.privacy": "سياسة الخصوصية",
+                "ft.legal.terms": "شروط الخدمة",
+                "ft.legal.security": "سياسة الأمان",
+                "ft.legal.cookie": "إعدادات ملفات تعريف الارتباط",
+                "ft.l.conversion": "SDK التحويل", "ft.l.pdfgen": "إنشاء PDF", "ft.l.server": "SDK الخادم",
+                "ft.l.aiparse": "تحليل المستندات بالذكاء الاصطناعي","ft.l.aiextract": "استخراج المستندات بالذكاء الاصطناعي", "ft.l.kb": "قاعدة معارف المؤسسة", "ft.l.loginapi": "تسجيل الدخول إلى API",
+                "ft.l.webguide": "أدلة الويب", "ft.l.javaguide": "أدلة Java", "ft.l.netguide": "أدلة .NET", "ft.l.androidguide": "أدلة Android",
+                "ft.l.iosguide": "أدلة iOS", "ft.l.flutterguide": "أدلة Flutter", "ft.l.apiref": "مرجع API", "ft.l.selfhost": "مستندات الاستضافة الذاتية",
+                "ft.l.freetrial": "تجربة مجانية", "ft.l.techsup": "الدعم الفني",
+                "ft.l.construction": "البناء", "ft.l.education": "التعليم", "ft.l.aviation": "الطيران", "ft.l.printing": "الطباعة",
+                "ft.l.manufacturing": "التصنيع", "ft.l.healthcare": "الرعاية الصحية", "ft.l.finance": "المالية", "ft.l.government": "القطاع الحكومي", "ft.l.commlicense": "ترخيص المجتمع",
+                "ft.l.about": "من نحن", "ft.l.contact": "اتصل بنا", "ft.l.press": "مجموعة الصحافة والمبيعات", "ft.l.reseller": "كن موزعاً معتمداً", "ft.l.partners": "الشركاء",
+                "ft.l.blog": "المدونة", "ft.l.casestudies": "دراسات الحالة", "ft.l.faq": "الأسئلة التقنية الشائعة",
+                "ty.title": "شكراً لتواصلك معنا!", "ty.desc": "لقد تلقينا رسالتك.<br>سنتواصل معك خلال يوم عمل واحد.",
+                "ty.home": "العودة إلى الصفحة الرئيسية", "ty.tutorials": "المزيد من الدروس التعليمية", "ty.follow": "تابعنا"
+            }
+        };
+        const LANG_LABELS = { en: 'EN', 'zh-CN': '简中', 'zh-TW': '繁中', es: 'ES', ja: '日本語', ko: '한국어', th: 'ไทย', de: 'DE', fr: 'FR', ru: 'RU', ar: 'العربية' };
+        const RTL_LANGS = ['ar'];
+        let currentLang = localStorage.getItem('compdf_lang') || 'en';
+        if (!I18N[currentLang]) currentLang = 'en';
+
+        const COMPDF_LANG_PREFIX = {'zh-CN':'zh-cn','ja':'ja','ko':'ko'};
+
+        // Store original hrefs for compdf.com links on first load
+        document.querySelectorAll('a[href*="compdf.com"]').forEach(a => {
+            a.setAttribute('data-href-original', a.getAttribute('href'));
+        });
+
+        function applyLang(lang) {
+            const dict = I18N[lang] || I18N.en;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = RTL_LANGS.indexOf(lang) !== -1 ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key] !== undefined) el.textContent = dict[key];
+            });
+            document.querySelectorAll('[data-i18n-html]').forEach(el => {
+                const key = el.getAttribute('data-i18n-html');
+                if (dict[key] !== undefined) el.innerHTML = dict[key];
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+                const key = el.getAttribute('data-i18n-ph');
+                if (dict[key] !== undefined) el.setAttribute('placeholder', dict[key]);
+            });
+            // Localize compdf.com links — only paths that have localized versions
+            const prefix = COMPDF_LANG_PREFIX[lang] || '';
+            // Paths with localized versions for all supported langs (zh-CN, ja, ko)
+            const COMMON_L10N = ['/pdf-sdk','/server','/web','/pricing','/support','/contact-sales','/company','/low-code','/ai'];
+            // Extra paths only zh-CN has localized
+            const ZHCN_L10N = ['/guides','/privacy-policy','/terms-of-service','/security','/trust'];
+            document.querySelectorAll('a[data-href-original]').forEach(a => {
+                const orig = a.getAttribute('data-href-original');
+                if (!prefix) { a.href = orig; return; }
+                try {
+                    const u = new URL(orig);
+                    if (u.hostname !== 'www.compdf.com') { a.href = orig; return; }
+                    const p = u.pathname;
+                    let canLocalize = COMMON_L10N.some(s => p === s || p.startsWith(s + '/'));
+                    if (!canLocalize && lang === 'zh-CN') {
+                        canLocalize = ZHCN_L10N.some(s => p === s || p.startsWith(s));
+                    }
+                    a.href = canLocalize
+                        ? orig.replace('https://www.compdf.com/', 'https://www.compdf.com/' + prefix + '/')
+                        : orig;
+                } catch(e) { a.href = orig; }
+            });
+            document.getElementById('langLabel').textContent = LANG_LABELS[lang] || lang.toUpperCase();
+            document.querySelectorAll('.lang-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+            currentLang = lang;
+            localStorage.setItem('compdf_lang', lang);
+        }
+
+        document.querySelectorAll('.lang-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyLang(btn.dataset.lang);
+                document.getElementById('langDropdown').classList.remove('open');
+            });
+        });
+        document.addEventListener('click', (e) => {
+            const sw = document.querySelector('.lang-switcher');
+            if (sw && !sw.contains(e.target)) {
+                document.getElementById('langDropdown').classList.remove('open');
+            }
+        });
+        applyLang(currentLang);
+
+        const modal = document.getElementById('leadModal');
+        const closeModal = document.getElementById('closeModal');
+        const ctaButtons = document.querySelectorAll('.cta-btn');
+        const sidebarCta = document.getElementById('sidebarCta');
+        const leadForm = document.getElementById('leadForm');
+        const leadModalForm = document.getElementById('leadModalForm');
+
+        // Custom validation messages — localized
+        function getDict() { return I18N[currentLang] || I18N.en; }
+
+        function setLocalizedValidation(form) {
+            form.querySelectorAll('input, textarea').forEach(function(field) {
+                field.addEventListener('invalid', function(e) {
+                    e.preventDefault();
+                    const d = getDict();
+                    if (field.validity.valueMissing) {
+                        field.setCustomValidity(d['val.required']);
+                    } else if (field.validity.typeMismatch) {
+                        field.setCustomValidity(d['val.email']);
+                    } else if (field.validity.tooShort) {
+                        field.setCustomValidity(d['val.tooShort'].replace('{minLength}', field.minLength));
+                    } else if (field.validity.patternMismatch) {
+                        field.setCustomValidity(d['val.pattern']);
+                    } else {
+                        field.setCustomValidity('');
+                    }
+                    field.reportValidity();
+                });
+                field.addEventListener('input', function() {
+                    field.setCustomValidity('');
+                });
+            });
+        }
+
+        setLocalizedValidation(leadForm);
+        setLocalizedValidation(leadModalForm);
+
+        // Open modal handlers
+        ctaButtons.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+        });
+
+        sidebarCta.addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+            const tyModal = document.getElementById('thankYouModal');
+            if (event.target === tyModal) {
+                tyModal.style.display = 'none';
+            }
+        });
+
+        leadForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            leadForm.reset();
+            document.getElementById('thankYouModal').style.display = 'flex';
+        });
+
+        leadModalForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            modal.style.display = 'none';
+            leadModalForm.reset();
+            document.getElementById('thankYouModal').style.display = 'flex';
+        });
+
+        // Benchmark table expand/collapse
+        function toggleBenchmark() {
+            const moreRows = document.getElementById('benchmarkMore');
+            const toggleText = document.getElementById('benchmarkToggleText');
+            const d = getDict();
+            if (moreRows.style.display === 'none') {
+                moreRows.style.display = '';
+                toggleText.textContent = d['bm.collapse'];
+            } else {
+                moreRows.style.display = 'none';
+                toggleText.textContent = d['bm.expand'];
+            }
+        }
+
+        // Floating sidebar — show only after scrolling past hero
+        const heroSection = document.getElementById('heroSection');
+        const floatingSidebar = document.getElementById('floatingSidebar');
+        function updateSidebarVisibility() {
+            const heroBottom = heroSection.getBoundingClientRect().bottom;
+            if (heroBottom <= 0) {
+                floatingSidebar.style.opacity = '1';
+                floatingSidebar.style.visibility = 'visible';
+            } else {
+                floatingSidebar.style.opacity = '0';
+                floatingSidebar.style.visibility = 'hidden';
+            }
+        }
+        window.addEventListener('scroll', updateSidebarVisibility, { passive: true });
+        updateSidebarVisibility();
+    </script>
+</body>
+</html>
